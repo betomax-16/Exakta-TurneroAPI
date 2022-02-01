@@ -1,0 +1,38 @@
+body {
+    background-color: #0000000d
+}
+
+.swagger-ui .topbar {
+    background-color: rgb(20, 109, 50);
+}
+
+.swagger-ui .info .base-url {
+    font-size: 25px;
+}
+
+.swagger-ui .markdown p {
+    font-size: 30px;
+}
+
+.swagger-ui .btn.execute {
+    background-color: green;
+}
+
+.swagger-ui button {
+    background: orange;
+}
+
+.swagger-ui .scheme-container {
+    background-color: white;
+}
+
+.swagger-ui .topbar-wrapper {
+    background: url("../../logo.jpg") no-repeat;
+    display: block;
+    background-size: 100px 45px;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+    width: 100px;
+    height: 45px;
+    padding-left: 100px;
+}
