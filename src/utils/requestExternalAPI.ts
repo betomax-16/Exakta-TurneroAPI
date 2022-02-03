@@ -1,6 +1,7 @@
 import http from "http";
-import dotenv from "dotenv";
-dotenv.config();
+import { getEnv } from "../enviroment";
+
+getEnv();
 
 export class RequestExternalAPI {
 

@@ -2,6 +2,8 @@ import rolController from "../controllers/rolController";
 import areaController from "../controllers/areaController";
 import turnStateController from "../controllers/turnStateController";
 import userController from "../controllers/userController";
+import sucursalController from "../controllers/sucursalController";
+import { RequestExternalAPI } from "../utils/requestExternalAPI";
 
 export class initDB {
     constructor() {
@@ -70,6 +72,23 @@ export class initDB {
                 sucursal: "Angelópolis",
                 username: "beto"
             });
+        }
+
+        const sucursales = await sucursalController.getAll();
+        if (sucursales && sucursales.length === 0) {
+            const res: any = await RequestExternalAPI.request('GET', `/api/sucursal`);
+            
+            const sucursals = res. body;
+            for (let index = 0; index < sucursals.length; index++) {
+                const suc = sucursals[index];
+                const data = {
+                    name: suc.name,
+                    color: '#fff',
+                    timeLimit: 15
+                };
+
+                sucursalController.create(data);
+            }
         }
     }
 }

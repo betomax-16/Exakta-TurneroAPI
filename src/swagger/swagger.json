@@ -67,6 +67,10 @@
         {
             "name": "Configuration",
             "description": "CRUD Configuration"
+        },
+        {
+            "name": "Configuration-Sucursal",
+            "description": "CRUD Configuration Sucursal"
         }
     ],
     "paths" : {
@@ -4740,6 +4744,462 @@
                 },
                 "security":[ { "api_key":[] } ]
             }
+        },
+        "/sucursal": {
+            "get": {
+                "tags": ["Configuration-Sucursal"],
+                "summary" : "Get all the sucursals",
+                "description": "Get all the sucursals",
+                "produces": ["application/json"],
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "name",
+                        "schema": {
+                            "type": "string",
+                            "example": "Atlixco|eq"
+                        },
+                        "description": "Filter data",
+                        "required": false
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "statusCode" : {
+                                    "type": "number"
+                                },
+                                "body" : {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/definitions/SucursalRes"
+                                    }
+                                },
+                                "message": {
+                                    "type": "string"
+                                }
+                            },
+                            "example": {
+                                "statusCode": 200,
+                                "body": [
+                                    {
+                                        "_id": "61b2690e4dae9ff4710f29b7",
+                                        "name": "Angelópolis",
+                                        "color": "#fff",
+                                        "timeLimit": 15,
+                                        "createdAt": "2021-12-09T21:14:03.817Z",
+                                        "updatedAt": "2021-12-09T21:14:03.817Z",
+                                        "__v": 0
+                                    }
+                                ],
+                                "message": "Successful response"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "statusCode" : {
+                                    "type": "number"
+                                },
+                                "body" : {
+                                    "$ref": "#/definitions/InvalidRes"
+                                },
+                                "message": {
+                                    "type": "string"
+                                }
+                            },
+                            "example": {
+                                "statusCode": 401,
+                                "body": {
+                                    "message": "unauthorized|TokenExpired"
+                                },
+                                "message": "Client error"
+                            }
+                        }
+                    },
+                    "5XX": {
+                        "description": "Server error",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "statusCode" : {
+                                    "type": "number"
+                                },
+                                "body" : {
+                                    "$ref": "#/definitions/InvalidRes"
+                                },
+                                "message": {
+                                    "type": "string"
+                                }
+                            },
+                            "example": {
+                                "statusCode": 500,
+                                "body": {
+                                    "message": "Message error."
+                                },
+                                "message": "Server error"
+                            }
+                        }
+                    }
+                },
+                "security":[ { "api_key":[] } ]
+            },
+            "post": {
+                "tags": ["Configuration-Sucursal"],
+                "summary" : "Create a config sucursal",
+                "description": "Create a config sucursal",
+                "produces": ["application/json"],
+                "parameters": [
+                    {
+                        "in": "body",
+                        "name": "user",
+                        "description": "SucursalConfig object",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/SucursalReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Successful operation",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "statusCode" : {
+                                    "type": "number"
+                                },
+                                "body" : {
+                                    "$ref": "#/definitions/SucursalRes"
+                                },
+                                "message": {
+                                    "type": "string"
+                                }
+                            },
+                            "example": {
+                                "statusCode": 201,
+                                "body": {
+                                    "_id": "61b2690e4dae9ff4710f29b7",
+                                    "name": "Angelópolis",
+                                    "color": "#fff",
+                                    "timeLimit": 15,
+                                    "createdAt": "2021-12-09T21:14:03.817Z",
+                                    "updatedAt": "2021-12-09T21:14:03.817Z",
+                                    "__v": 0
+                                },
+                                "message": "Successful response"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "statusCode" : {
+                                    "type": "number"
+                                },
+                                "body" : {
+                                    "$ref": "#/definitions/InvalidRes"
+                                },
+                                "message": {
+                                    "type": "string"
+                                }
+                            },
+                            "example": {
+                                "statusCode": 401,
+                                "body": {
+                                    "message": "unauthorized|TokenExpired"
+                                },
+                                "message": "Client error"
+                            }
+                        }
+                    },
+                    "5XX": {
+                        "description": "Server error",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "statusCode" : {
+                                    "type": "number"
+                                },
+                                "body" : {
+                                    "$ref": "#/definitions/InvalidRes"
+                                },
+                                "message": {
+                                    "type": "string"
+                                }
+                            },
+                            "example": {
+                                "statusCode": 500,
+                                "body": {
+                                    "message": "Message error."
+                                },
+                                "message": "Server error"
+                            }
+                        }
+                    }
+                },
+                "security":[ { "api_key":[] } ]
+            }
+        },
+        "/sucursal/:{name}": {
+            "put": {
+                "tags": ["Configuration-Sucursal"],
+                "summary" : "Update a config sucursal",
+                "description": "Update a config sucursal",
+                "produces": ["application/json"],
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "name",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "example": "Angelópolis"
+                        },
+                        "description": "Name of the sucursal"
+                    },
+                    {
+                        "in": "body",
+                        "name": "user",
+                        "description": "Partial ConfigSucursal object",
+                        "schema": {
+                            "$ref": "#/definitions/SucursalReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "statusCode" : {
+                                    "type": "number"
+                                },
+                                "body" : {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/definitions/SucursalRes"
+                                    }
+                                },
+                                "message": {
+                                    "type": "string"
+                                }
+                            },
+                            "example": {
+                                "statusCode": 200,
+                                "body": {
+                                    "_id": "61b2690e4dae9ff4710f29b7",
+                                    "name": "Angelópolis",
+                                    "color": "#000",
+                                    "timeLimit": 17,
+                                    "createdAt": "2021-12-09T21:14:03.817Z",
+                                    "updatedAt": "2021-12-09T21:14:03.817Z",
+                                    "__v": 0
+                                },
+                                "message": "Successful response"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "statusCode" : {
+                                    "type": "number"
+                                },
+                                "body" : {
+                                    "$ref": "#/definitions/InvalidRes"
+                                },
+                                "message": {
+                                    "type": "string"
+                                }
+                            },
+                            "example": {
+                                "statusCode": 401,
+                                "body": {
+                                    "message": "unauthorized|TokenExpired"
+                                },
+                                "message": "Client error"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not found",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "statusCode" : {
+                                    "type": "number"
+                                },
+                                "body" : {
+                                    "type": "object"
+                                },
+                                "message": {
+                                    "type": "string"
+                                }
+                            },
+                            "example": {
+                                "statusCode": 404,
+                                "body": {},
+                                "message": "Client error"
+                            }
+                        }
+                    },
+                    "5XX": {
+                        "description": "Server error",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "statusCode" : {
+                                    "type": "number"
+                                },
+                                "body" : {
+                                    "$ref": "#/definitions/InvalidRes"
+                                },
+                                "message": {
+                                    "type": "string"
+                                }
+                            },
+                            "example": {
+                                "statusCode": 500,
+                                "body": {
+                                    "message": "Message error."
+                                },
+                                "message": "Server error"
+                            }
+                        }
+                    }
+                },
+                "security":[ { "api_key":[] } ]
+            },
+            "delete": {
+                "tags": ["Configuration-Sucursal"],
+                "summary" : "Delete a config sucursal",
+                "description": "Delete a config sucursal",
+                "produces": ["application/json"],
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "name",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "example": "Angelópolis"
+                        },
+                        "description": "Name of the sucursal"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "statusCode" : {
+                                    "type": "number"
+                                },
+                                "body" : {
+                                    "type": "object",
+                                    "message": {
+                                        "type": "string"
+                                    }
+                                },
+                                "message": {
+                                    "type": "string"
+                                }
+                            },
+                            "example": {
+                                "statusCode": 200,
+                                "body": {
+                                    "message": "Successfully deleted user."
+                                },
+                                "message": "Successful response"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "statusCode" : {
+                                    "type": "number"
+                                },
+                                "body" : {
+                                    "$ref": "#/definitions/InvalidRes"
+                                },
+                                "message": {
+                                    "type": "string"
+                                }
+                            },
+                            "example": {
+                                "statusCode": 401,
+                                "body": {
+                                    "message": "unauthorized|TokenExpired"
+                                },
+                                "message": "Client error"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not found",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "statusCode" : {
+                                    "type": "number"
+                                },
+                                "body" : {
+                                    "type": "object"
+                                },
+                                "message": {
+                                    "type": "string"
+                                }
+                            },
+                            "example": {
+                                "statusCode": 404,
+                                "body": {},
+                                "message": "Client error"
+                            }
+                        }
+                    },
+                    "5XX": {
+                        "description": "Server error",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "statusCode" : {
+                                    "type": "number"
+                                },
+                                "body" : {
+                                    "$ref": "#/definitions/InvalidRes"
+                                },
+                                "message": {
+                                    "type": "string"
+                                }
+                            },
+                            "example": {
+                                "statusCode": 500,
+                                "body": {
+                                    "message": "Message error."
+                                },
+                                "message": "Server error"
+                            }
+                        }
+                    }
+                },
+                "security":[ { "api_key":[] } ]
+            }
         }
     }, 
     "definitions": {
@@ -5441,6 +5901,56 @@
             ],
             "example": {
                 "timer": 5000
+            } 
+        },
+        "SucursalRes": {
+            "type": "object",
+            "properties": {
+                "_id":  {
+                    "type": "string"
+                },
+                "name":  {
+                    "type": "string"
+                },
+                "color":  {
+                    "type": "string"
+                },
+                "timeLimit":  {
+                    "type": "number"
+                },
+                "createdAt":  {
+                    "type": "string"
+                },
+                "updatedAt":  {
+                    "type": "string"
+                },
+                "__v":  {
+                    "type": "number"
+                }
+            }
+        },
+        "SucursalReq": {
+            "type": "object",
+            "properties": {
+                "name":  {
+                    "type": "string"
+                },
+                "color":  {
+                    "type": "string"
+                },
+                "timeLimit":  {
+                    "type": "number"
+                }
+            },
+            "required": [ 
+                "name",
+                "color",
+                "timeLimit"
+            ],
+            "example": {
+                "name": "Angelópolis",
+                "color": "#fff",
+                "timeLimit": 15
             } 
         }
     },

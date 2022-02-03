@@ -8,20 +8,20 @@ export interface IModule extends Document {
     name: string;
     type: string;
     status: boolean;
-    pattern?: IModule['_id'];
     username?: IUser['username'];
     sucursal: string;
     mode: string;
+    isPrivilegeByArrivalTime: boolean;
 }
 
 const ModuloSchema: Schema = new Schema({
     name: { type: String, required: true, index: true },
     type: { type: String, required: true },
     status: { type: Boolean, required: true, default: false },
-    pattern: { type: String, ref:'Modules' },
     username: { type: String, ref:'users', index: true },
     sucursal: { type: String, required: true, index: true },
-    mode: { type: String, required: true, default: 'auto' }
+    mode: { type: String, required: true, default: 'auto' },
+    isPrivilegeByArrivalTime: { type: Boolean, required: true, default: false },
 },
 { timestamps: true })
 .index({ username: 1, name: 1, sucursal: 1 }, { unique: true })
@@ -51,18 +51,6 @@ const ModuloSchema: Schema = new Schema({
             }
         }
     }
-    // Verifica que un modulo solo sea vigilado por otro de tipo "VIGIA" y este se encuentre en la misma sucursal
-    if (this.pattern) {
-        const module = await moduleController.get(this.pattern, this.sucursal);
-        if (!module) {
-            next(new Error(`Non-existent module ${this.pattern}.`));
-        }
-        else {
-            if (module.type.toLowerCase() != 'vigia') {
-                next(new Error(`The module ${this.pattern} not is type 'vigia'.`));
-            }
-        }
-    }
     next();
 })
 .pre("updateOne", async function(next) {
@@ -86,21 +74,6 @@ const ModuloSchema: Schema = new Schema({
                     if (res[index].username && res[index].username == this._update.$set.username) {
                         next(new Error(`User ${this._update.$set.username} is operating another module ( ${res[index].name} ).`));
                     }
-                }
-            }
-        }
-    }
-    // Verifica que un modulo solo sea vigilado por otro de tipo "VIGIA" y este se encuentre en la misma sucursal
-    if (this._update.$set.pattern && this._update.$set.pattern != '') {
-        const self = await moduleController.get(this._conditions.name, this._conditions.suc);
-        if (self) {
-            const module = await moduleController.get(this._update.$set.pattern, this._conditions.suc);
-            if (!module) {
-                next(new Error(`Non-existent module ${this._update.$set.pattern}.`));
-            }
-            else {
-                if (module.type.toLowerCase() != 'vigia') {
-                    next(new Error(`The module ${this._update.$set.pattern} not is type 'vigia'.`));
                 }
             }
         }

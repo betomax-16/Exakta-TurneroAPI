@@ -42,7 +42,7 @@ module.exports = (env, argv) => {
             new CopyPlugin({
                 patterns: [
                     { context: './src', from: "public", to: "static" },
-                    { context: '.', from: "swagger", to: "swagger" }
+                    { context: './src', from: "swagger", to: "swagger" }
                 ],
             }),
             new Dotenv({

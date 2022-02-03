@@ -56,9 +56,9 @@ server.io.on("connection", async function(socket: socketio.Socket) {
       socket.join(sucursal);
     });
 
-    socket.on('join-type', ({ sucursal, type, name, username }, callback) => {
+    socket.on('join-type', ({ sucursal, type, name, username, user }, callback) => {
       socket.join(`${sucursal}-${type}`);
-      socket.broadcast.to(`${sucursal}`).emit('moduleLess', { name, username });
+      socket.broadcast.to(`${sucursal}`).emit('moduleLess', { name, username, user });
     });
 
     socket.on('addModule', ({ sucursal, data }) => {
