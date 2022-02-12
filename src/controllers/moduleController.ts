@@ -22,24 +22,24 @@ class ModuleController {
                         break;
                     case 'Recepcionista':
                         myQuery['type'] = 'modulo';
-                        if (!suc) {
-                            myQuery['sucursal'] = sucursal;   
-                        }
+                        // if (!suc) {
+                        //     myQuery['sucursal'] = sucursal;   
+                        // }
 
                         if (queries) {
                             queries.forEach(element => {
                                 fields.push(element.field);
                             });
                         }
-
+                        
                         if (!myQuery.username && !fields.includes('username')) {
                             myQuery['username'] = { "$in": [ null, "" ] };    
                         }
                         break;
                     case 'Vigia':
-                        if (!suc) {
-                            myQuery['sucursal'] = sucursal;   
-                        }
+                        // if (!suc) {
+                        //     myQuery['sucursal'] = sucursal;   
+                        // }
 
                         if (queries) {
                             queries.forEach(element => {

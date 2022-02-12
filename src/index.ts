@@ -17,39 +17,27 @@ server.io.on("connection", async function(socket: socketio.Socket) {
     // console.log(users);
 
     socket.on('newTurn', ({ sucursal, data }) => {
-      socket.broadcast.to(sucursal).emit('newTurn', {
-        turn: data
-      });
+      socket.broadcast.to(sucursal).emit('newTurn', data);
     });
 
     socket.on('turnAttend', ({ sucursal, data }) => {
-      socket.broadcast.to(sucursal).emit('turnAttend', {
-        turn: data
-      });
+      socket.broadcast.to(sucursal).emit('turnAttend', data);
     });
 
     socket.on('turnFinish', ({ sucursal, data }) => {
-      socket.broadcast.to(sucursal).emit('turnFinish', {
-        turn: data
-      });
+      socket.broadcast.to(sucursal).emit('turnFinish', data);
     });
 
     socket.on('newTurnTest', ({ sucursal, type, data }) => {
-      socket.broadcast.to(`${sucursal}-${type}`).emit('newTurnTest', {
-        turn: data
-      });
+      socket.broadcast.to(`${sucursal}-${type}`).emit('newTurnTest', data);
     });
 
     socket.on('attendTurnTest', ({ sucursal, type, data }) => {
-      socket.broadcast.to(`${sucursal}-${type}`).emit('attendTurnTest', {
-        turn: data
-      });
+      socket.broadcast.to(`${sucursal}-${type}`).emit('attendTurnTest', data);
     });
 
     socket.on('turnReCall', ({ sucursal, data }) => {
-      socket.broadcast.to(sucursal).emit('turnReCall', {
-        turn: data
-      });
+      socket.broadcast.to(sucursal).emit('turnReCall', data);
     });
 
     socket.on('join-sucursal', (sucursal) => {

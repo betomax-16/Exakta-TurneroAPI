@@ -101,7 +101,7 @@ class TurnController {
         }
     }
 
-    private static async createTrace(oldState: string, trace: ITraceTurn|any): Promise<ITurn|null> {
+    private static async createTrace(oldState: string, trace: ITraceTurn|any): Promise<any|null> {
         try {
             const result = await TurnController.update(trace.turn, trace.sucursal, {state: trace.state});
             if ((result.modifiedCount && result.modifiedCount == 1) || trace.state === 're-call') {
@@ -110,16 +110,21 @@ class TurnController {
 
                 const res = await traceTurnController.update(trace.turn, trace.sucursal, oldState, data);
                 
+                let traceRes: any = {};
                 if (res.modifiedCount == 1) {
                     trace.startDate = dateTrace;
                     if (trace.state === 'cancelado' || trace.state === 'terminado') {
                         trace.finalDate = dateTrace;
                         trace.ubication = 'salida';
                     }
-                    await traceTurnController.create(trace);   
+                    traceRes = await traceTurnController.create(trace);   
                 }
 
-                return await TurnController.get(trace.turn, trace.sucursal);
+                const turn = await TurnController.get(trace.turn, trace.sucursal);
+                return {
+                    turn: turn,
+                    trace: traceRes
+                }
             }
             else {
                 throw new Error("No update state");
@@ -129,7 +134,7 @@ class TurnController {
         }
     }
 
-    static async takeNewTurn(area: string, sucursal: string): Promise<ITurn|null> {
+    static async takeNewTurn(area: string, sucursal: string): Promise<any|null> {
         try {
             let next: string;
             const lastTurn = await Turn.aggregate([
@@ -182,7 +187,7 @@ class TurnController {
             };
 
             const newTurn = await TurnController.create(data);
-
+            let traceRes: any = {};
             if (newTurn) {
                 const trace = {
                     turn: next,
@@ -191,9 +196,13 @@ class TurnController {
                     state: state,
                     sucursal: sucursal
                 };
-                await traceTurnController.create(trace);
+                traceRes = await traceTurnController.create(trace);
             }
-            return newTurn;
+
+            return {
+                turn: newTurn,
+                trace: traceRes
+            };
         } catch (error: any) {
             throw error;
         }
@@ -259,6 +268,7 @@ class TurnController {
             const dateInit = moment().hour(0).minute(0).second(0).millisecond(0).toDate();
             const dateFinish = moment().hour(23).minute(59).second(59).millisecond(999).toDate();
             const resModule = await moduleController.get(ubication, sucursal);
+            
             if (resModule) {
                 if (resModule.mode === 'manual') {
                     const res = await TurnController.manualTurn(area, sucursal, ubication, useraname, dateInit, dateFinish);
@@ -340,7 +350,9 @@ class TurnController {
 
                     if (!resPrivilege || (resPrivilege && resPrivilege.length === 0)) {
                         const areas = await areaSucursalController.get(sucursal);
-
+                        console.log("----------------------------------");
+                        console.log("Datos areas de una sucursal: ", areas);
+                        console.log("----------------------------------");
                         if (areas) {
                             // for (let index = 0; index < areas.length; index++) {
                             //     const next = await TurnController.getNextTurn(areas[index].area, sucursal, dateInit, dateFinish);
@@ -376,20 +388,20 @@ class TurnController {
                             // a = b
                             return 0;
                         });
+
                         const areas = await areaSucursalController.get(sucursal);
-                        let auxAreas: IAreaSucursal[] = [];
+                        // let auxAreas: IAreaSucursal[] = [];
 
                         if (areas) {
-                            areas.forEach(area => {
-                                const result = auxOrderData.find(i => i.area === area.area);
-                                if (!result) {
-                                    auxAreas.push(area);
-                                }
-                            });
-    
-    
+                            // areas.forEach(a => {
+                            //     const result = auxOrderData.find(i => i.area === a.area);
+                            //     if (!result) {
+                            //         auxAreas.push(a);
+                            //     }
+                            // });
+
                             for (let index = 0; index < auxOrderData.length; index++) {
-                                if (auxOrderData[index].privilege > 1) {
+                                if (auxOrderData[index].privilege > 0) {
                                     const next = await TurnController.getNextTurn(auxOrderData[index].area, sucursal, dateInit, dateFinish);
                                     if (next.length) {
                                         const data = {
