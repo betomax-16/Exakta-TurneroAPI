@@ -493,11 +493,12 @@ class TurnController {
                 },
                 { $match: { 
                     sucursal: sucursal, 
-                    state: 'espera toma',
+                    $or: [ {state: 'espera toma'}, {state: 'en toma'}, {state: 're-call'}],
                     creationDate:{
                             $gte:dateInit,
                             $lte:dateFinish
-                    }
+                    },
+                    finalDate: { "$in": [ null, "" ] }
                 } },
                 { $unwind: "$data-area" },
                 { $sort: { createdAt: 1 } },
@@ -569,13 +570,14 @@ class TurnController {
         }
     }
 
-    static async assistanceTurn(turn: string, sucursal: string, ubication: string): Promise<ITurn|null> {
+    static async assistanceTurn(turn: string, sucursal: string, ubication: string, username: string): Promise<ITurn|null> {
         try {
             const data = {
                 turn: turn,
                 ubication: ubication,
                 state: 'en toma',
-                sucursal: sucursal
+                sucursal: sucursal,
+                username: username
             };
 
             return await TurnController.createTrace('espera toma', data);
@@ -584,12 +586,13 @@ class TurnController {
         }
     }
 
-    static async cancelOrFinishTurn(turn: string, sucursal: string, isFinish: boolean, ubication: string): Promise<ITurn|null> {
+    static async cancelOrFinishTurn(turn: string, sucursal: string, isFinish: boolean, ubication: string, username: string): Promise<ITurn|null> {
         try {
             const data = {
                 turn: turn,
                 state: !isFinish ? 'cancelado' : 'terminado',
-                sucursal: sucursal
+                sucursal: sucursal,
+                username: username
             };
 
             const res = await TurnController.createTrace('', data);

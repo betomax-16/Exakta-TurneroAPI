@@ -157,8 +157,8 @@ class TurnRoutes {
 
     async assistanceTurn(req: Request, res: Response) {
         try {
-            const { turn, sucursal, ubication } = req.body;
-            const result = await turnController.assistanceTurn(turn, sucursal, ubication);
+            const { turn, sucursal, ubication, username } = req.body;
+            const result = await turnController.assistanceTurn(turn, sucursal, ubication, username);
             ResponseWrapper.handler(res, result, 201);
         } catch (error: any) {
             Errors.handler(error, res);
@@ -167,17 +167,17 @@ class TurnRoutes {
 
     async reCallTurn(req: Request, res: Response) {
         try {
-            const { turn, sucursal, ubication } = req.body;
+            const { turn, sucursal, ubication, username } = req.body;
             let auxUbication = ubication;
             const auxReq: any = req;
-            const username = auxReq.jwtPayload ? auxReq.jwtPayload.username : undefined;
-            if (username) {
-                const resultModule = await moduleController.getByUser(username);
+            const uname = auxReq.jwtPayload ? auxReq.jwtPayload.username : username;
+            if (uname) {
+                const resultModule = await moduleController.getByUser(uname);
                 if (resultModule) {
                     auxUbication = resultModule.name;   
                 }
             }
-            const result = await turnController.reCallTurn(turn, sucursal, auxUbication, username);
+            const result = await turnController.reCallTurn(turn, sucursal, auxUbication, uname);
             ResponseWrapper.handler(res, result, 200);
         } catch (error: any) {
             Errors.handler(error, res);
@@ -186,8 +186,8 @@ class TurnRoutes {
 
     async cancelTurn(req: Request, res: Response) {
         try {
-            const { turn, sucursal, ubication } = req.body;
-            const result = await turnController.cancelOrFinishTurn(turn, sucursal, false, ubication);
+            const { turn, sucursal, ubication, username } = req.body;
+            const result = await turnController.cancelOrFinishTurn(turn, sucursal, false, ubication, username);
             ResponseWrapper.handler(res, result, 200);
         } catch (error: any) {
             Errors.handler(error, res);
@@ -196,8 +196,8 @@ class TurnRoutes {
 
     async finishTurn(req: Request, res: Response) {
         try {
-            const { turn, sucursal, ubication } = req.body;
-            const result = await turnController.cancelOrFinishTurn(turn, sucursal, true, ubication);
+            const { turn, sucursal, ubication, username } = req.body;
+            const result = await turnController.cancelOrFinishTurn(turn, sucursal, true, ubication, username);
             ResponseWrapper.handler(res, result, 200);
         } catch (error: any) {
             Errors.handler(error, res);

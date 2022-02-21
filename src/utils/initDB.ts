@@ -20,6 +20,7 @@ export class initDB {
             rolController.create('Admin');
             rolController.create('Recepcionista');
             rolController.create('Vigia');
+            rolController.create('Tomador');
         }
 
         const areas = await areaController.getAll();
@@ -58,6 +59,10 @@ export class initDB {
             turnStateController.create({
                 name: 're-call',
                 description: 'Estado que señala que se volvio a solicitar la presencia del cliente.'
+            });
+            turnStateController.create({
+                name: 'pausa',
+                description: 'Estado que señala que un turno entra en pausa para poder atender otro diferente.'
             });
         }
 

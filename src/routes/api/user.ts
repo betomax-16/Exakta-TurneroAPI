@@ -30,7 +30,7 @@ class UserRoutes {
 
     async getAll(req: Request, res: Response) {
         try {
-            const { username, rol } = (req as any).jwtPayload;
+            // const { username, rol } = (req as any).jwtPayload;
             const auxQueries: IQueryRequest[] = getQueries(req);
             const result: IUser[]|null = await userController.getAll(auxQueries);
             ResponseWrapper.handler(res, result, 200);    
