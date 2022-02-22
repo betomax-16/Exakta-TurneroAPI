@@ -95,6 +95,14 @@ class TraceHistoryController {
         }
     }
 
+    static async delete(turn: string, sucursal: string, state: string): Promise<any|null> {
+        try {
+            return await TraceTurn.deleteOne({turn: turn, sucursal: sucursal, state: state});
+        } catch (error: any) {
+            throw error;
+        }
+    }
+
     static async migration(): Promise<boolean> {
         try {
             const res = await TraceTurn.find({});

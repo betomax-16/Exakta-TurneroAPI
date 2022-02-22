@@ -1,7 +1,7 @@
 import moment from "moment";
 import Turn, { ITurn } from '../models/turn';
 import TurnHistory from "../models/turnHistory";
-import { ITraceTurn } from "../models/traceTurn";
+import Trace, { ITraceTurn } from "../models/traceTurn";
 import areaController from "../controllers/areaController";
 import traceTurnController from "../controllers/traceTurnController";
 import { IQueryRequest, getQueriesMongo } from "../models/utils/queryRequest";
@@ -617,6 +617,34 @@ class TurnController {
             }
 
             return await TurnController.createTrace('', data);
+        } catch (error: any) {
+            throw error;
+        }
+    }
+
+    static async freeTurn(turn: string, sucursal: string): Promise<any|null> {
+        try {
+            let trace = await Trace.findOne({turn: turn, sucursal: sucursal, finalDate:{ "$in": [ null, "" ] }});
+            while (trace && trace.state !== 'espera toma') {
+                await traceTurnController.delete(turn, sucursal, trace.state);
+                let auxTrace = await Trace.find({turn: turn, sucursal: sucursal}).sort( { "startDate": -1 } ).limit(1);
+
+                if (auxTrace.length) {
+                    await Trace.findOneAndUpdate({turn: turn, sucursal: sucursal, state: auxTrace[0].state}, {$unset: {finalDate: 1 }});    
+                    auxTrace[0].finalDate = undefined;
+                }
+                
+                trace = auxTrace.length === 1 ? auxTrace[0] : null;
+            }
+            
+            const state = trace && trace.state ? trace.state.toString() : '';
+            await TurnController.update(turn, sucursal, {state: state});
+            const turnOld = await TurnController.get(turn, sucursal);
+            return {
+                turn: turnOld,
+                trace: trace
+            }
+            
         } catch (error: any) {
             throw error;
         }

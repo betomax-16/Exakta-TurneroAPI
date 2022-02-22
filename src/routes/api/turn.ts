@@ -48,6 +48,8 @@ class TurnRoutes {
                         .post([checkOptionalJwt], this.reCallTurn);
         this.router.route('/action/finished')
                         .post(this.finishTurn);
+        this.router.route('/action/free')
+                        .post(this.freeTurn);
 
         this.router.route('/action/reset')
                         .delete(this.resset);
@@ -198,6 +200,16 @@ class TurnRoutes {
         try {
             const { turn, sucursal, ubication, username } = req.body;
             const result = await turnController.cancelOrFinishTurn(turn, sucursal, true, ubication, username);
+            ResponseWrapper.handler(res, result, 200);
+        } catch (error: any) {
+            Errors.handler(error, res);
+        }
+    }
+
+    async freeTurn(req: Request, res: Response) {
+        try {
+            const { turn, sucursal } = req.body;
+            const result = await turnController.freeTurn(turn, sucursal);
             ResponseWrapper.handler(res, result, 200);
         } catch (error: any) {
             Errors.handler(error, res);
