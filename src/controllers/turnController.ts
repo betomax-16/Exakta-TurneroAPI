@@ -513,6 +513,75 @@ class TurnController {
                     "prefix": "$data-area.prefix"
                 }}
             ]);
+
+            // return await Turn.aggregate([
+            //     { $match: { 
+            //         sucursal: sucursal, 
+            //         $or: [ {state: 'espera toma'}, {state: 'en toma'}, {state: 're-call'}],
+            //         startDate:{
+            //                 $gte:dateInit,
+            //                 $lte:dateFinish
+            //         },
+            //         finalDate: { "$in": [ null, "" ] }
+            //     } },
+            //     { $lookup: {
+            //                  from: "shifts",
+            //                  localField: "turn",
+            //                  foreignField: "turn",
+            //                  as: "data-turn"
+            //                }
+            //     },
+            //     { $lookup: {
+            //                  from: "modules",
+            //                  localField: "ubication",
+            //                  foreignField: "name",
+            //                  as: "data-module"
+            //                }
+            //     },
+            //     { "$unwind": {
+            //         "path": "$data-turn",
+            //         "preserveNullAndEmptyArrays": true
+            //     } },
+            //     { "$unwind": {
+            //         "path": "$data-module",
+            //         "preserveNullAndEmptyArrays": true
+            //     } },
+            //     { $unwind: "$data-turn" },
+            //     { $project : { 
+            //         "_id": 1,
+            //         "turn": 1,
+            //         "state": 1,
+            //         "sucursal": 1,
+            //         "startDate": 1,
+            //         "data-module": 1,
+            //         "createdAt": 1,
+            //         "area": "$data-turn.area"
+            //     }},
+            //     { $lookup: {
+            //                  from: "areas",
+            //                  localField: "area",
+            //                  foreignField: "name",
+            //                  as: "data-area"
+            //                }
+            //     },
+            //     { $unwind: "$data-area" },
+            //     { "$unwind": {
+            //         "path": "$data-module",
+            //         "preserveNullAndEmptyArrays": true
+            //     } },
+            //     { $sort: { createdAt: 1 } },
+            //     { $project : { 
+            //         "_id": 1,
+            //         "turn": 1,
+            //         "area": 1,
+            //         "state": 1,
+            //         "sucursal": 1,
+            //         "creationDate": 1,
+            //         "prefix": "$data-area.prefix",
+            //         "type": "$data-module.type"
+            //     }},
+                
+            // ]);
         } catch (error: any) {
             throw error;
         }
@@ -536,18 +605,18 @@ class TurnController {
                 },
                 {
                     $lookup: {
-                        from: "TraceTurn",
-                        let: { candidateId: "$turn" },
-                        pipeline: [ {
-                            $match: {finalDate: { "$in": [ null, "" ] }}
-                        }],
-                        as: "trace"
-                    }
+                         from: "TraceTurn",
+                         localField: "turn",
+                         foreignField: "turn",
+                         as: "trace"
+                    },
                 },
                 {
-                    $unwind: {
-                        path: "$trace",
-                        preserveNullAndEmptyArrays: false
+                    $unwind: "$trace",
+                },
+                {
+                    $match: {
+                        "trace.finalDate": { "$in": [ null, "" ] }
                     }
                 },
                 {
