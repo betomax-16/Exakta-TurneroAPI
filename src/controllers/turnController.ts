@@ -487,7 +487,7 @@ class TurnController {
                 { $match: { 
                     sucursal: sucursal, 
                     $or: [ {state: 'espera toma'}, {state: 'en toma'}, {state: 're-call'}],
-                    creationDate:{
+                    startDate:{
                         $gte:dateInit,
                         $lte:dateFinish
                     },
@@ -561,7 +561,7 @@ class TurnController {
                 { $match: { 
                     sucursal: sucursal, 
                     $or: [ {state: 'espera toma'}, {state: 'en toma'}, {state: 're-call'}],
-                    creationDate:{
+                    startDate:{
                         $gte:dateInit,
                         $lte:dateFinish
                     },
