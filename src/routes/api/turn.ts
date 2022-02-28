@@ -40,6 +40,8 @@ class TurnRoutes {
                         .get(this.getPenddingShifts);
         this.router.route('/action/attended/:suc')
                         .get(this.getAssistanceShifts);
+        this.router.route('/action/attended-traces/:suc')
+                        .get(this.getAssistanceTraces);
         this.router.route('/action/assistance')
                         .post(this.assistanceTurn);
         this.router.route('/action/cancelation')
@@ -219,6 +221,15 @@ class TurnRoutes {
     async getAssistanceShifts(req: Request, res: Response) {
         try {
             const result = await turnController.getAssistanceShifts(req.params.suc);
+            ResponseWrapper.handler(res, result, 200);
+        } catch (error: any) {
+            Errors.handler(error, res);
+        }
+    }
+
+    async getAssistanceTraces(req: Request, res: Response) {
+        try {
+            const result = await turnController.getAssistanceTraces(req.params.suc);
             ResponseWrapper.handler(res, result, 200);
         } catch (error: any) {
             Errors.handler(error, res);

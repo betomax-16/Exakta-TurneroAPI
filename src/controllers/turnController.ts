@@ -483,7 +483,48 @@ class TurnController {
             const dateInit = moment().hour(0).minute(0).second(0).millisecond(0).toDate();
             const dateFinish = moment().hour(23).minute(59).second(59).millisecond(999).toDate();
             
-            return await Turn.aggregate([
+            return await Trace.aggregate([
+                { $match: { 
+                    sucursal: sucursal, 
+                    $or: [ {state: 'espera toma'}, {state: 'en toma'}, {state: 're-call'}],
+                    creationDate:{
+                        $gte:dateInit,
+                        $lte:dateFinish
+                    },
+                    finalDate: { "$in": [ null, "" ] }
+                } },
+                { $lookup: {
+                             from: "shifts",
+                             localField: "turn",
+                             foreignField: "turn",
+                             as: "data-turn"
+                           }
+                },
+                { $lookup: {
+                             from: "modules",
+                             localField: "ubication",
+                             foreignField: "name",
+                             as: "data-module"
+                           }
+                },
+                { "$unwind": {
+                    "path": "$data-turn",
+                    "preserveNullAndEmptyArrays": true
+                } },
+                { "$unwind": {
+                    "path": "$data-module",
+                    "preserveNullAndEmptyArrays": true
+                } },
+                { $project : { 
+                    "_id": 1,
+                    "turn": 1,
+                    "state": 1,
+                    "sucursal": 1,
+                    "startDate": 1,
+                    "data-module": 1,
+                    "createdAt": 1,
+                    "area": "$data-turn.area"
+                }},
                 { $lookup: {
                              from: "areas",
                              localField: "area",
@@ -491,97 +532,95 @@ class TurnController {
                              as: "data-area"
                            }
                 },
-                { $match: { 
-                    sucursal: sucursal, 
-                    $or: [ {state: 'espera toma'}, {state: 'en toma'}, {state: 're-call'}],
-                    creationDate:{
-                            $gte:dateInit,
-                            $lte:dateFinish
-                    },
-                    finalDate: { "$in": [ null, "" ] }
-                } },
                 { $unwind: "$data-area" },
-                { $sort: { createdAt: 1 } },
-                // { $limit: 1 },
                 { $project : { 
                     "_id": 1,
                     "turn": 1,
                     "area": 1,
                     "state": 1,
                     "sucursal": 1,
-                    "creationDate": 1,
-                    "prefix": "$data-area.prefix"
-                }}
+                    "creationDate": "$startDate",
+                    "prefix": "$data-area.prefix",
+                }},
+                { $match: { 
+                    $or: [ {state: 'espera toma'}, {state: 'en toma'}, {$and: [ {state: 're-call'} , {type: 'toma'} ]} ],
+                } },
+                { $sort: { creationDate: 1 } },
             ]);
+        } catch (error: any) {
+            throw error;
+        }
+    }
 
-            // return await Turn.aggregate([
-            //     { $match: { 
-            //         sucursal: sucursal, 
-            //         $or: [ {state: 'espera toma'}, {state: 'en toma'}, {state: 're-call'}],
-            //         startDate:{
-            //                 $gte:dateInit,
-            //                 $lte:dateFinish
-            //         },
-            //         finalDate: { "$in": [ null, "" ] }
-            //     } },
-            //     { $lookup: {
-            //                  from: "shifts",
-            //                  localField: "turn",
-            //                  foreignField: "turn",
-            //                  as: "data-turn"
-            //                }
-            //     },
-            //     { $lookup: {
-            //                  from: "modules",
-            //                  localField: "ubication",
-            //                  foreignField: "name",
-            //                  as: "data-module"
-            //                }
-            //     },
-            //     { "$unwind": {
-            //         "path": "$data-turn",
-            //         "preserveNullAndEmptyArrays": true
-            //     } },
-            //     { "$unwind": {
-            //         "path": "$data-module",
-            //         "preserveNullAndEmptyArrays": true
-            //     } },
-            //     { $unwind: "$data-turn" },
-            //     { $project : { 
-            //         "_id": 1,
-            //         "turn": 1,
-            //         "state": 1,
-            //         "sucursal": 1,
-            //         "startDate": 1,
-            //         "data-module": 1,
-            //         "createdAt": 1,
-            //         "area": "$data-turn.area"
-            //     }},
-            //     { $lookup: {
-            //                  from: "areas",
-            //                  localField: "area",
-            //                  foreignField: "name",
-            //                  as: "data-area"
-            //                }
-            //     },
-            //     { $unwind: "$data-area" },
-            //     { "$unwind": {
-            //         "path": "$data-module",
-            //         "preserveNullAndEmptyArrays": true
-            //     } },
-            //     { $sort: { createdAt: 1 } },
-            //     { $project : { 
-            //         "_id": 1,
-            //         "turn": 1,
-            //         "area": 1,
-            //         "state": 1,
-            //         "sucursal": 1,
-            //         "creationDate": 1,
-            //         "prefix": "$data-area.prefix",
-            //         "type": "$data-module.type"
-            //     }},
-                
-            // ]);
+    static async getAssistanceTraces(sucursal: string): Promise<any[]|null> {
+        try {
+            const dateInit = moment().hour(0).minute(0).second(0).millisecond(0).toDate();
+            const dateFinish = moment().hour(23).minute(59).second(59).millisecond(999).toDate();
+            
+            return await Trace.aggregate([
+                { $match: { 
+                    sucursal: sucursal, 
+                    $or: [ {state: 'espera toma'}, {state: 'en toma'}, {state: 're-call'}],
+                    creationDate:{
+                        $gte:dateInit,
+                        $lte:dateFinish
+                    },
+                    finalDate: { "$in": [ null, "" ] }
+                } },
+                { $lookup: {
+                             from: "shifts",
+                             localField: "turn",
+                             foreignField: "turn",
+                             as: "data-turn"
+                           }
+                },
+                { $lookup: {
+                             from: "modules",
+                             localField: "ubication",
+                             foreignField: "name",
+                             as: "data-module"
+                           }
+                },
+                { "$unwind": {
+                    "path": "$data-turn",
+                    "preserveNullAndEmptyArrays": true
+                } },
+                { "$unwind": {
+                    "path": "$data-module",
+                    "preserveNullAndEmptyArrays": true
+                } },
+                { $project : { 
+                    "_id": 1,
+                    "turn": 1,
+                    "state": 1,
+                    "sucursal": 1,
+                    "startDate": 1,
+                    "data-module": 1,
+                    "createdAt": 1,
+                    "ubication": 1,
+                    "area": "$data-turn.area"
+                }},
+                { $lookup: {
+                             from: "areas",
+                             localField: "area",
+                             foreignField: "name",
+                             as: "data-area"
+                           }
+                },
+                { $unwind: "$data-area" },
+                { $project : { 
+                    "_id": 1,
+                    "turn": 1,
+                    "ubication": 1,
+                    "state": 1,
+                    "sucursal": 1,
+                    "startDate": 1
+                }},
+                { $match: { 
+                    $or: [ {state: 'espera toma'}, {state: 'en toma'}, {$and: [ {state: 're-call'} , {type: 'toma'} ]} ],
+                } },
+                { $sort: { startDate: 1 } },
+            ]);
         } catch (error: any) {
             throw error;
         }
@@ -596,7 +635,7 @@ class TurnController {
                 {
                     $match: {
                         sucursal: sucursal,
-                        $or: [ {state: 'en atencion'}, {state: 're-call'}],
+                        $or: [ {state: 'en atencion'}, {state: 're-call'}, {state: 'en toma'}],
                         creationDate:{
                             $gte:dateInit,
                             $lte:dateFinish
