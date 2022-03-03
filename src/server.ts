@@ -36,7 +36,7 @@ class Server {
     this.http = http.createServer(this.app);
     this.io = new socketio.Server(this.http, {
       cors: {
-        origin: "http://localhost:3000",
+        origin: ["http://localhost:3000", "http://192.168.1.14:3000"],
         methods: ["GET", "POST"],
       }
     });
