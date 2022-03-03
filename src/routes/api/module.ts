@@ -39,12 +39,16 @@ class ModuleRoutes {
     }
 
     async get(req: Request, res: Response) {
-        const result: IModule|null = await moduleController.get(req.params.name, req.params.suc);
-        if (result) {
-            ResponseWrapper.handler(res, result, 200);
-        }
-        else {
-            ResponseWrapper.handler(res, {}, 404);
+        try {
+            const result: IModule|null = await moduleController.get(req.params.name, req.params.suc);
+            if (result) {
+                ResponseWrapper.handler(res, result, 200);
+            }
+            else {
+                ResponseWrapper.handler(res, {}, 404);
+            }
+        } catch (error) {
+            Errors.handler(error, res);
         }
     }
 

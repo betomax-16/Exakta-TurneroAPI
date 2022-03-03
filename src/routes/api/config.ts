@@ -24,8 +24,12 @@ class ConfigRoutes {
     }
 
     async get(req: Request, res: Response) {
-        const result: IConfig[]|null = await configController.get();
-        ResponseWrapper.handler(res, result, 200);
+        try {
+            const result: IConfig[]|null = await configController.get();
+            ResponseWrapper.handler(res, result, 200);
+        } catch (error) {
+            Errors.handler(error, res);
+        }
     }
 
     async save(req: Request, res: Response) {

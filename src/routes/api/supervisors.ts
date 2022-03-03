@@ -29,13 +29,21 @@ class SupervisorRoutes {
     }
 
     async getSalves(req: Request, res: Response) {
-        const result: ISupervisor[] = await supervisorController.getSlaves(req.params.idVigia);
-        ResponseWrapper.handler(res, result, 200);
+        try {
+            const result: ISupervisor[] = await supervisorController.getSlaves(req.params.idVigia);
+            ResponseWrapper.handler(res, result, 200);    
+        } catch (error) {
+            Errors.handler(error, res);
+        }
     }
 
     async getSupervisors(req: Request, res: Response) {
-        const result: ISupervisor[] = await supervisorController.getSupervisors(req.params.idModule);
-        ResponseWrapper.handler(res, result, 200);
+        try {
+            const result: ISupervisor[] = await supervisorController.getSupervisors(req.params.idModule);
+            ResponseWrapper.handler(res, result, 200);    
+        } catch (error) {
+            Errors.handler(error, res);
+        }
     }
 
     async create(req: Request, res: Response) {

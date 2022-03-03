@@ -27,17 +27,26 @@ class Receptionist_AreaRoutes {
     }
 
     async getAll(req: Request, res: Response) {
-        const result: IReceptionist_Area[]|null = await receptionist_areaController.getAll();
-        ResponseWrapper.handler(res, result, 200);
+        try {
+            const result: IReceptionist_Area[]|null = await receptionist_areaController.getAll();
+            ResponseWrapper.handler(res, result, 200);
+        } catch (error) {
+            Errors.handler(error, res);
+        }
+        
     }
 
     async get(req: Request, res: Response) {
-        const result: IReceptionist_Area[]|null = await receptionist_areaController.get(req.params.username);
-        if (result) {
-            ResponseWrapper.handler(res, result, 200);
-        }
-        else {
-            ResponseWrapper.handler(res, {}, 404);
+        try {
+            const result: IReceptionist_Area[]|null = await receptionist_areaController.get(req.params.username);
+            if (result) {
+                ResponseWrapper.handler(res, result, 200);
+            }
+            else {
+                ResponseWrapper.handler(res, {}, 404);
+            }
+        } catch (error) {
+            Errors.handler(error, res);
         }
     }
 

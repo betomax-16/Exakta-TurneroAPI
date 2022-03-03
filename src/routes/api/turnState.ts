@@ -24,17 +24,25 @@ class TurnStateRoutes {
     }
 
     async getAll(req: Request, res: Response) {
-        const result: ITurnState[]|null = await turnStateController.getAll();
-        ResponseWrapper.handler(res, result, 200);
+        try {
+            const result: ITurnState[]|null = await turnStateController.getAll();
+            ResponseWrapper.handler(res, result, 200);
+        } catch (error) {
+            Errors.handler(error, res);
+        }
     }
 
     async get(req: Request, res: Response) {
-        const result: ITurnState|null = await turnStateController.get(req.params.name);
-        if (result) {
-            ResponseWrapper.handler(res, result, 200);
-        }
-        else {
-            ResponseWrapper.handler(res, {}, 404);
+        try {
+            const result: ITurnState|null = await turnStateController.get(req.params.name);
+            if (result) {
+                ResponseWrapper.handler(res, result, 200);
+            }
+            else {
+                ResponseWrapper.handler(res, {}, 404);
+            }
+        } catch (error) {
+            Errors.handler(error, res);
         }
     }
 

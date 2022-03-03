@@ -29,17 +29,25 @@ class AreaRoutes {
     }
 
     async getAll(req: Request, res: Response) {
-        const result: ISucursal[]|null = await sucursalController.getAll();
-        ResponseWrapper.handler(res, result, 200);
+        try {
+            const result: ISucursal[]|null = await sucursalController.getAll();
+            ResponseWrapper.handler(res, result, 200);    
+        } catch (error) {
+            Errors.handler(error, res);
+        }
     }
 
     async get(req: Request, res: Response) {
-        const result: ISucursal|null = await sucursalController.get(req.params.name);
-        if (result) {
-            ResponseWrapper.handler(res, result, 200);
-        }
-        else {
-            ResponseWrapper.handler(res, {}, 400);
+        try {
+            const result: ISucursal|null = await sucursalController.get(req.params.name);
+            if (result) {
+                ResponseWrapper.handler(res, result, 200);
+            }
+            else {
+                ResponseWrapper.handler(res, {}, 400);
+            }
+        } catch (error) {
+            Errors.handler(error, res);
         }
     }
 

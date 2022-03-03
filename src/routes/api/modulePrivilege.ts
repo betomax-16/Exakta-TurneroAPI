@@ -27,12 +27,16 @@ class ModulePrivilegeRoutes {
     }
 
     async get(req: Request, res: Response) {
-        const result: IModulePrivilege[]|null = await modulePrivilegeController.get(req.params.idmodule);
-        if (result) {
-            ResponseWrapper.handler(res, result, 200);
-        }
-        else {
-            ResponseWrapper.handler(res, {}, 404);
+        try {
+            const result: IModulePrivilege[]|null = await modulePrivilegeController.get(req.params.idmodule);
+            if (result) {
+                ResponseWrapper.handler(res, result, 200);
+            }
+            else {
+                ResponseWrapper.handler(res, {}, 404);
+            }
+        } catch (error) {
+            Errors.handler(error, res);
         }
     }
 

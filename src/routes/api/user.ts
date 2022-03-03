@@ -40,12 +40,16 @@ class UserRoutes {
     }
 
     async get(req: Request, res: Response) {
-        const result: IUser|null = await userController.get(req.params.username);
-        if (result) {
-            ResponseWrapper.handler(res, result, 200);
-        }
-        else {
-            ResponseWrapper.handler(res, {}, 404);
+        try {
+            const result: IUser|null = await userController.get(req.params.username);
+            if (result) {
+                ResponseWrapper.handler(res, result, 200);
+            }
+            else {
+                ResponseWrapper.handler(res, {}, 404);
+            }
+        } catch (error) {
+            Errors.handler(error, res);
         }
     }
 

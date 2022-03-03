@@ -69,12 +69,16 @@ class TurnRoutes {
     }
 
     async get(req: Request, res: Response) {
-        const result: ITurn|null = await turnController.get(req.params.turn, req.params.suc);
-        if (result) {
-            ResponseWrapper.handler(res, result, 200);
-        }
-        else {
-            ResponseWrapper.handler(res, {}, 404);
+        try {
+            const result: ITurn|null = await turnController.get(req.params.turn, req.params.suc);
+            if (result) {
+                ResponseWrapper.handler(res, result, 200);
+            }
+            else {
+                ResponseWrapper.handler(res, {}, 404);
+            }
+        } catch (error) {
+            Errors.handler(error, res);
         }
     }
 

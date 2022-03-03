@@ -49,12 +49,16 @@ class TurnHistoryRoutes {
     }
 
     async get(req: Request, res: Response) {
-        const result: ITurnHistory|null = await turnHistoryController.get(req.params.id);
-        if (result) {
-            ResponseWrapper.handler(res, result, 200);
-        }
-        else {
-            ResponseWrapper.handler(res, {}, 404);
+        try {
+            const result: ITurnHistory|null = await turnHistoryController.get(req.params.id);
+            if (result) {
+                ResponseWrapper.handler(res, result, 200);
+            }
+            else {
+                ResponseWrapper.handler(res, {}, 404);
+            }
+        } catch (error) {
+            Errors.handler(error, res);
         }
     }
 
