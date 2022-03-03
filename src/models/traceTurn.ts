@@ -10,6 +10,7 @@ export interface ITraceTurn extends Document {
     finalDate?: Date|null;
     username?: string;
     sucursal: string;
+    sourceSection: string;
 }
 
 const TraceTurnSchema: Schema<ITraceTurn> = new Schema<ITraceTurn>({
@@ -20,6 +21,7 @@ const TraceTurnSchema: Schema<ITraceTurn> = new Schema<ITraceTurn>({
     finalDate: { type: Date },
     username: { type: String },
     sucursal: { type: String, required: true },
+    sourceSection: { type: String, required: true },
 },
 { timestamps: true })
 .pre("save", async function(this: ITraceTurn, next) {

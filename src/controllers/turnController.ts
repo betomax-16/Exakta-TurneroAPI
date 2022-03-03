@@ -183,7 +183,7 @@ class TurnController {
                 area: area,
                 creationDate: dateInit,
                 state: state,
-                sucursal: sucursal
+                sucursal: sucursal,
             };
 
             const newTurn = await TurnController.create(data);
@@ -194,7 +194,8 @@ class TurnController {
                     startDate: dateInit,
                     ubication: 'recepcion',
                     state: state,
-                    sucursal: sucursal
+                    sucursal: sucursal,
+                    sourceSection: 'recepcion'
                 };
                 traceRes = await traceTurnController.create(trace);
             }
@@ -253,7 +254,8 @@ class TurnController {
                 ubication: ubication,
                 state: 'en atencion',
                 username: useraname,
-                sucursal: sucursal
+                sucursal: sucursal,
+                sourceSection: 'recepcion'
             };
 
             return await TurnController.createTrace('espera', data);
@@ -319,7 +321,8 @@ class TurnController {
                                     ubication: ubication,
                                     state: 'en atencion',
                                     username: useraname,
-                                    sucursal: sucursal
+                                    sucursal: sucursal,
+                                    sourceSection: 'recepcion'
                                 };
                     
                                 const res = await TurnController.createTrace('espera', data);
@@ -409,7 +412,8 @@ class TurnController {
                                             ubication: ubication,
                                             state: 'en atencion',
                                             username: useraname,
-                                            sucursal: sucursal
+                                            sucursal: sucursal,
+                                            sourceSection: 'recepcion'
                                         };
                             
                                         const res = await TurnController.createTrace('espera', data);
@@ -467,7 +471,8 @@ class TurnController {
                 turn: turn,
                 ubication: auxubication,
                 state: auxState,
-                sucursal: sucursal
+                sucursal: sucursal,
+                sourceSection: 'recepcion'
             };
 
             const res = await TurnController.createTrace('en atencion', data);
@@ -685,7 +690,8 @@ class TurnController {
                 ubication: ubication,
                 state: 'en toma',
                 sucursal: sucursal,
-                username: username
+                username: username,
+                sourceSection: 'toma'
             };
 
             return await TurnController.createTrace('espera toma', data);
@@ -694,13 +700,14 @@ class TurnController {
         }
     }
 
-    static async cancelOrFinishTurn(turn: string, sucursal: string, isFinish: boolean, ubication: string, username: string): Promise<ITurn|null> {
+    static async cancelOrFinishTurn(turn: string, sucursal: string, isFinish: boolean, ubication: string, username: string, source: string): Promise<ITurn|null> {
         try {
             const data = {
                 turn: turn,
                 state: !isFinish ? 'cancelado' : 'terminado',
                 sucursal: sucursal,
-                username: username
+                username: username,
+                sourceSection: source
             };
 
             const res = await TurnController.createTrace('', data);
@@ -711,13 +718,14 @@ class TurnController {
         }
     }
 
-    static async reCallTurn(turn: string, sucursal: string, ubication: string, username?: string): Promise<ITurn|null> {
+    static async reCallTurn(turn: string, sucursal: string, ubication: string, source: string, username?: string): Promise<ITurn|null> {
         try {
             const data: any = {
                 turn: turn,
                 ubication: ubication,
                 state: 're-call',
-                sucursal: sucursal
+                sucursal: sucursal,
+                sourceSection: source
             };
 
             if (username) {
@@ -732,26 +740,39 @@ class TurnController {
 
     static async freeTurn(turn: string, sucursal: string): Promise<any|null> {
         try {
-            let trace = await Trace.findOne({turn: turn, sucursal: sucursal, finalDate:{ "$in": [ null, "" ] }});
-            while (trace && trace.state !== 'espera toma') {
-                await traceTurnController.delete(turn, sucursal, trace.state);
-                let auxTrace = await Trace.find({turn: turn, sucursal: sucursal}).sort( { "startDate": -1 } ).limit(1);
+            const data = {
+                turn: turn,
+                ubication: 'recepcion',
+                state: 'espera toma',
+                sucursal: sucursal,
+                sourceSection: 'toma'
+            };
 
-                if (auxTrace.length) {
-                    await Trace.findOneAndUpdate({turn: turn, sucursal: sucursal, state: auxTrace[0].state}, {$unset: {finalDate: 1 }});    
-                    auxTrace[0].finalDate = undefined;
-                }
+            const res = await TurnController.createTrace('', data);
+            return res;
+
+
+
+            // let trace = await Trace.findOne({turn: turn, sucursal: sucursal, finalDate:{ "$in": [ null, "" ] }});
+            // while (trace && trace.state !== 'espera toma') {
+            //     await traceTurnController.delete(turn, sucursal, trace.state);
+            //     let auxTrace = await Trace.find({turn: turn, sucursal: sucursal}).sort( { "startDate": -1 } ).limit(1);
+
+            //     if (auxTrace.length) {
+            //         await Trace.findOneAndUpdate({turn: turn, sucursal: sucursal, state: auxTrace[0].state}, {$unset: {finalDate: 1 }});    
+            //         auxTrace[0].finalDate = undefined;
+            //     }
                 
-                trace = auxTrace.length === 1 ? auxTrace[0] : null;
-            }
+            //     trace = auxTrace.length === 1 ? auxTrace[0] : null;
+            // }
             
-            const state = trace && trace.state ? trace.state.toString() : '';
-            await TurnController.update(turn, sucursal, {state: state});
-            const turnOld = await TurnController.get(turn, sucursal);
-            return {
-                turn: turnOld,
-                trace: trace
-            }
+            // const state = trace && trace.state ? trace.state.toString() : '';
+            // await TurnController.update(turn, sucursal, {state: state});
+            // const turnOld = await TurnController.get(turn, sucursal);
+            // return {
+            //     turn: turnOld,
+            //     trace: trace
+            // }
             
         } catch (error: any) {
             throw error;

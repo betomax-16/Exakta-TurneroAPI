@@ -171,7 +171,7 @@ class TurnRoutes {
 
     async reCallTurn(req: Request, res: Response) {
         try {
-            const { turn, sucursal, ubication, username } = req.body;
+            const { turn, sucursal, ubication, username, source } = req.body;
             let auxUbication = ubication;
             const auxReq: any = req;
             const uname = auxReq.jwtPayload ? auxReq.jwtPayload.username : username;
@@ -181,7 +181,7 @@ class TurnRoutes {
                     auxUbication = resultModule.name;   
                 }
             }
-            const result = await turnController.reCallTurn(turn, sucursal, auxUbication, uname);
+            const result = await turnController.reCallTurn(turn, sucursal, auxUbication, source, uname);
             ResponseWrapper.handler(res, result, 200);
         } catch (error: any) {
             Errors.handler(error, res);
@@ -190,8 +190,8 @@ class TurnRoutes {
 
     async cancelTurn(req: Request, res: Response) {
         try {
-            const { turn, sucursal, ubication, username } = req.body;
-            const result = await turnController.cancelOrFinishTurn(turn, sucursal, false, ubication, username);
+            const { turn, sucursal, ubication, username, source } = req.body;
+            const result = await turnController.cancelOrFinishTurn(turn, sucursal, false, ubication, username, source);
             ResponseWrapper.handler(res, result, 200);
         } catch (error: any) {
             Errors.handler(error, res);
@@ -200,8 +200,8 @@ class TurnRoutes {
 
     async finishTurn(req: Request, res: Response) {
         try {
-            const { turn, sucursal, ubication, username } = req.body;
-            const result = await turnController.cancelOrFinishTurn(turn, sucursal, true, ubication, username);
+            const { turn, sucursal, ubication, username, source } = req.body;
+            const result = await turnController.cancelOrFinishTurn(turn, sucursal, true, ubication, username, source);
             ResponseWrapper.handler(res, result, 200);
         } catch (error: any) {
             Errors.handler(error, res);

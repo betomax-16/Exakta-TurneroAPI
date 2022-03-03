@@ -8,6 +8,7 @@ export interface ITraceHistory extends Document {
     finalDate?: Date;
     username?: string;
     sucursal: string;
+    sourceSection: string;
 }
 
 const TraceHistorySchema: Schema<ITraceHistory> = new Schema<ITraceHistory>({
@@ -18,6 +19,7 @@ const TraceHistorySchema: Schema<ITraceHistory> = new Schema<ITraceHistory>({
     finalDate: { type: Date },
     username: { type: String },
     sucursal: { type: String, required: true },
+    sourceSection: { type: String, required: true },
 },
 { timestamps: true });
 

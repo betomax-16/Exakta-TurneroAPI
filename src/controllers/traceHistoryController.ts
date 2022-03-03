@@ -114,6 +114,7 @@ class TraceHistoryController {
                         state: 1,
                         sucursal: 1,
                         ubication: 1,
+                        sourceSection: 1,
                         area: "$dataTurn.area"
                     } 
                 },
@@ -135,6 +136,7 @@ class TraceHistoryController {
                     area: element.area,
                     turn: element.turn,
                     state: element.state,
+                    sourceSection: element.sourceSection,
                     timeMili: final.diff(start)
                 });
 
@@ -176,13 +178,14 @@ class TraceHistoryController {
                         }
 
                         if (element.state === 're-call') {
-                            const resFinish = dataArea.find(r => r.turn === element.turn && r.state === 'terminado' && moment(r.startDate).day() ===  moment(element.startDate).day());
+                            const tracesRes = dataArea.filter(r => r.sourceSection === element.sourceSection);
+                            const resFinish = tracesRes.find(r => r.turn === element.turn && (r.state === 'terminado' || r.state === 'espera toma') && moment(r.startDate).day() ===  moment(element.startDate).day());
                             if (resFinish) {
                                 attentionTime += element.timeMili;
                                 maxWaitAttentionTime += element.timeMili;
                             }
                             else {
-                                const resCancel = dataArea.find(r => r.turn === element.turn && r.state === 'cancelado' && moment(r.startDate).day() ===  moment(element.startDate).day());
+                                const resCancel = tracesRes.find(r => r.turn === element.turn && r.state === 'cancelado' && moment(r.startDate).day() ===  moment(element.startDate).day());
                                 if (resCancel) {
                                     waitTime += element.timeMili;
                                     maxWaitTime += element.timeMili;
@@ -268,6 +271,7 @@ class TraceHistoryController {
                         state: 1,
                         sucursal: 1,
                         ubication: 1,
+                        sourceSection: 1,
                         area: "$dataTurn.area"
                     } 
                 },
@@ -285,11 +289,13 @@ class TraceHistoryController {
                 const final = moment(element.finalDate);
 
                 table.push({
+                    id: element._id,
                     sucursal: element.sucursal,
                     area: element.area,
                     turn: element.turn,
                     state: element.state,
                     timeMili: final.diff(start),
+                    sourceSection: element.sourceSection,
                     startDate: element.startDate
                 });
 
@@ -350,7 +356,7 @@ class TraceHistoryController {
                         let maxWaitAttentionTime: number = 0;
 
                         if (Object.prototype.hasOwnProperty.call(objectTracesTurnByInterval, key)) {
-                            const traces: any[] = objectTracesTurnByInterval[key];
+                            let traces: any[] = objectTracesTurnByInterval[key];
                             
                             traces.forEach(element => {
                                 if (element.state === 'espera') {
@@ -366,13 +372,14 @@ class TraceHistoryController {
                                 }
 
                                 if (element.state === 're-call') {
-                                    const resFinish = traces.find(r => r.turn === element.turn && r.state === 'terminado' && moment(r.startDate).day() ===  moment(element.startDate).day());
+                                    // const tracesRes = traces.filter(r => r.sourceSection === element.sourceSection);
+                                    const resFinish = traces.find(r => r.turn === element.turn && (r.state === 'terminado' || (r.state === 'espera toma' && r.sourceSection === 'recepcion')) && moment(r.startDate).day() ===  moment(element.startDate).day());
                                     if (resFinish) {
                                         attentionTime += element.timeMili;
                                         maxWaitAttentionTime += element.timeMili;
                                     }
                                     else {
-                                        const resCancel = traces.find(r => r.turn === element.turn && r.state === 'cancelado' && moment(r.startDate).day() ===  moment(element.startDate).day());
+                                        const resCancel = traces.find(r => r.turn === element.turn && (r.state === 'cancelado' || (r.state === 'espera toma' && r.sourceSection === 'toma')) && moment(r.startDate).day() ===  moment(element.startDate).day());
                                         if (resCancel) {
                                             waitTime += element.timeMili;
                                             maxWaitTime += element.timeMili;
@@ -388,7 +395,10 @@ class TraceHistoryController {
                                 }
 
                                 if (element.state === 'en atencion' || element.state === 'en toma') {
-                                    attentionShifts.push(element.turn);
+                                    if (!attentionShifts.includes(element.turn)) {
+                                        attentionShifts.push(element.turn);
+                                    }
+                                    
                                     attentionTime += element.timeMili;
                                     if (maxWaitAttentionTime < element.timeMili) {
                                         maxWaitAttentionTime = element.timeMili;
@@ -463,6 +473,7 @@ class TraceHistoryController {
                         sucursal: 1,
                         ubication: 1,
                         username: 1,
+                        sourceSection: 1,
                         area: "$dataTurn.area"
                     } 
                 },
@@ -487,7 +498,8 @@ class TraceHistoryController {
                     username: element.username,
                     timeMili: final.diff(start),
                     startDate: element.startDate,
-                    finalDate: element.finalDate
+                    finalDate: element.finalDate,
+                    sourceSection: element.sourceSection
                 });
 
                 if (!sucursals.includes(element.sucursal)) {
@@ -514,24 +526,27 @@ class TraceHistoryController {
                         let user: string = '';
                         let module: string = '';
 
-                        const tracesReception = traces.filter(r => r.username !== undefined || r.state === 'espera');
-                        const tracesToma = traces.filter(r => r.username === undefined || r.username === null);
+                        const tracesReception = traces.filter(r => r.sourceSection === 'recepcion');
+                        const tracesToma = traces.filter(r => r.sourceSection === 'toma');
 
                         tracesReception.forEach(element => {
                             if (element.state === 'en atencion') {
                                 hourCall = moment(element.startDate).format('hh:mm:ss');
                                 user = element.username;
                                 module = element.ubication;
-                                hourFinish = moment(element.finalDate).format('hh:mm:ss');
+                            }
+
+                            if (element.state === 'espera toma' || element.state === 'terminado' || element.state === 'cancelado') {
+                                hourFinish = moment(element.startDate).format('hh:mm:ss');
                             }
 
                             if (element.state === 're-call') {
-                                const resFinish = traces.find(r => r.turn === element.turn && (r.state === 'terminado' || r.state === 'espera toma') && moment(r.startDate).format('YYYY-MM-DD') === moment(element.startDate).format('YYYY-MM-DD'));
+                                const resFinish = tracesReception.find(r => r.turn === element.turn && (r.state === 'terminado' || r.state === 'espera toma') && moment(r.startDate).format('YYYY-MM-DD') === moment(element.startDate).format('YYYY-MM-DD'));
                                 if (resFinish) {
                                     attentionTime += element.timeMili;
                                 }
                                 else {
-                                    const resCancel = traces.find(r => r.turn === element.turn && r.state === 'cancelado' && moment(r.startDate).format('YYYY-MM-DD') === moment(element.startDate).format('YYYY-MM-DD'));
+                                    const resCancel = tracesReception.find(r => r.turn === element.turn && r.state === 'cancelado' && moment(r.startDate).format('YYYY-MM-DD') === moment(element.startDate).format('YYYY-MM-DD'));
                                     if (resCancel) {
                                         waitTime += element.timeMili;
                                     }
@@ -571,34 +586,36 @@ class TraceHistoryController {
                             hourInit = '';
                             user = '';
                             module = '';
+
+                            const resInit = tracesReception.find(r => r.state === 'espera toma');
+                            if (resInit) {
+                                hourInit = moment(resInit.startDate).format('hh:mm:ss');
+                                waitTime += resInit.timeMili;
+                            }
+
                             tracesToma.forEach(element => {
                                 if (element.state === 'en toma') {
                                     hourCall = moment(element.startDate).format('hh:mm:ss');
                                     user = element.username;
                                     module = element.ubication;
-                                    hourFinish = moment(element.finalDate).format('hh:mm:ss');
+                                    attentionTime += element.timeMili;
+                                }
+
+                                if (element.state === 'terminado' || element.state === 'cancelado') {
+                                    hourFinish = moment(element.startDate).format('hh:mm:ss');
                                 }
 
                                 if (element.state === 're-call') {
-                                    const resFinish = traces.find(r => r.turn === element.turn && r.state === 'terminado' && moment(r.startDate).format('YYYY-MM-DD') === moment(element.startDate).format('YYYY-MM-DD'));
+                                    const resFinish = tracesToma.find(r => r.turn === element.turn && r.state === 'terminado' && moment(r.startDate).format('YYYY-MM-DD') === moment(element.startDate).format('YYYY-MM-DD'));
                                     if (resFinish) {
                                         attentionTime += element.timeMili;
                                     }
                                     else {
-                                        const resCancel = traces.find(r => r.turn === element.turn && r.state === 'cancelado' && moment(r.startDate).format('YYYY-MM-DD') === moment(element.startDate).format('YYYY-MM-DD'));
+                                        const resCancel = tracesToma.find(r => r.turn === element.turn && (r.state === 'cancelado' || r.state === 'espera toma') && moment(r.startDate).format('YYYY-MM-DD') === moment(element.startDate).format('YYYY-MM-DD'));
                                         if (resCancel) {
                                             waitTime += element.timeMili;
                                         }
                                     }
-                                }
-
-                                if (element.state === 'espera toma') {
-                                    hourInit = moment(element.startDate).format('hh:mm:ss');
-                                    waitTime += element.timeMili;
-                                }
-
-                                if (element.state === 'en toma') {
-                                    attentionTime += element.timeMili;
                                 }
                             });
 
