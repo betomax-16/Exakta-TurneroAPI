@@ -52,6 +52,10 @@ class TurnRoutes {
                         .post(this.finishTurn);
         this.router.route('/action/free')
                         .post(this.freeTurn);
+        this.router.route('/action/lookout/shifts/:suc')
+                        .get(this.getTurnsLookOut);
+        this.router.route('/action/lookout/traces/:suc')
+                        .get(this.getTracesLookOut);
 
         this.router.route('/action/reset')
                         .delete(this.resset);
@@ -216,6 +220,24 @@ class TurnRoutes {
         try {
             const { turn, sucursal } = req.body;
             const result = await turnController.freeTurn(turn, sucursal);
+            ResponseWrapper.handler(res, result, 200);
+        } catch (error: any) {
+            Errors.handler(error, res);
+        }
+    }
+
+    async getTurnsLookOut(req: Request, res: Response) {
+        try {
+            const result = await turnController.getTurnsLookOut(req.params.suc);
+            ResponseWrapper.handler(res, result, 200);
+        } catch (error: any) {
+            Errors.handler(error, res);
+        }
+    }
+
+    async getTracesLookOut(req: Request, res: Response) {
+        try {
+            const result = await turnController.getTraceLookOut(req.params.suc);
             ResponseWrapper.handler(res, result, 200);
         } catch (error: any) {
             Errors.handler(error, res);

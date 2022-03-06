@@ -44,12 +44,12 @@ class Server {
 
   private config(): void {
     getEnv();
-    const {MONGO_URI, MONGO_URI_AZURE, MONGO_USER_AZURE, MONGO_PASS_AZURE, MODE} = process.env;
+    const {MONGO_URI_DEV, MONGO_URI_TEST, MONGO_URI_PROD, MONGO_USER_AZURE, MONGO_PASS_AZURE, MODE} = process.env;
     
-    const URI = MODE === 'PROD' ? MONGO_URI_AZURE : MONGO_URI;
-
+    let dataBase: any  = '';
     if (MODE === 'PROD') {
-      mongoose.connect(URI || '', {
+      dataBase = MONGO_URI_PROD;
+      mongoose.connect(MONGO_URI_PROD || '', {
         auth: {
           password: MONGO_PASS_AZURE,
           username: MONGO_USER_AZURE
@@ -57,8 +57,13 @@ class Server {
         retryWrites: false
       });
     }
-    else {
-      mongoose.connect(URI || '');
+    else if (MODE === 'TEST') {
+      dataBase = MONGO_URI_TEST;
+      mongoose.connect(MONGO_URI_TEST || '');
+    }
+    else if (MODE === 'DEV') {
+      dataBase = MONGO_URI_DEV;
+      mongoose.connect(MONGO_URI_DEV || '');
     }
 
     const db = mongoose.connection;
@@ -68,7 +73,8 @@ class Server {
     });
 
     db.once('open', function(){
-      console.log(`Connection to DB successful, db:${URI}`);
+      console.log(`Mode: ${MODE}`);
+      console.log(`Connection to DB successful on: ${dataBase}`);
       new initDB();
     });
 

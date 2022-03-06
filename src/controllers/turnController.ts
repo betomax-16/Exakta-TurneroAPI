@@ -483,6 +483,60 @@ class TurnController {
         }
     }
 
+    static async getTurnsLookOut(sucursal: string) {
+        try {
+            const dateInit = moment().hour(0).minute(0).second(0).millisecond(0).toDate();
+            const dateFinish = moment().hour(23).minute(59).second(59).millisecond(999).toDate();
+
+            return await Turn.find({$and: [{sucursal: sucursal}, {state: {$not: {$eq: 'terminado'}}}, {state: {$not: {$eq: 'cancelado'}}}, {creationDate:{
+                $gte:dateInit,
+                $lte:dateFinish
+            }}]});
+        } catch (error: any) {
+            throw error;
+        }
+    }
+
+    static async getTraceLookOut(sucursal: string) {
+        try {
+            const dateInit = moment().hour(0).minute(0).second(0).millisecond(0).toDate();
+            const dateFinish = moment().hour(23).minute(59).second(59).millisecond(999).toDate();
+
+            return await Turn.aggregate([
+                { $match: { 
+                    $and: [{sucursal: sucursal}, {state: {$not: {$eq: 'terminado'}}}, {state: {$not: {$eq: 'cancelado'}}}, {creationDate:{
+                        $gte:dateInit,
+                        $lte:dateFinish
+                    }}]
+                } },
+                { $lookup: {
+                             from: "TraceTurn",
+                             localField: "turn",
+                             foreignField: "turn",
+                             as: "data-turn"
+                           }
+                },
+                { "$unwind": {
+                    "path": "$data-turn",
+                    "preserveNullAndEmptyArrays": true
+                } },
+                { $project : { 
+                    "_id": "$data-turn._id",
+                    "turn": "$data-turn.turn",
+                    "state": "$data-turn.state",
+                    "sucursal": "$data-turn.sucursal",
+                    "startDate": "$data-turn.startDate",
+                    "finalDate": "$data-turn.finalDate",
+                    "username": "$data-turn.username",
+                    "ubication": "$data-turn.ubication",
+                    "sourceSection": "$data-turn.sourceSection",
+                }}
+            ]);
+        } catch (error: any) {
+            throw error;
+        }
+    }
+
     static async getAssistanceShifts(sucursal: string): Promise<any[]|null> {
         try {
             const dateInit = moment().hour(0).minute(0).second(0).millisecond(0).toDate();
@@ -505,19 +559,8 @@ class TurnController {
                              as: "data-turn"
                            }
                 },
-                { $lookup: {
-                             from: "modules",
-                             localField: "ubication",
-                             foreignField: "name",
-                             as: "data-module"
-                           }
-                },
                 { "$unwind": {
                     "path": "$data-turn",
-                    "preserveNullAndEmptyArrays": true
-                } },
-                { "$unwind": {
-                    "path": "$data-module",
                     "preserveNullAndEmptyArrays": true
                 } },
                 { $project : { 
@@ -528,6 +571,7 @@ class TurnController {
                     "startDate": 1,
                     "data-module": 1,
                     "createdAt": 1,
+                    "sourceSection": 1,
                     "area": "$data-turn.area"
                 }},
                 { $lookup: {
@@ -544,11 +588,12 @@ class TurnController {
                     "area": 1,
                     "state": 1,
                     "sucursal": 1,
+                    "sourceSection": 1,
                     "creationDate": "$startDate",
                     "prefix": "$data-area.prefix",
                 }},
                 { $match: { 
-                    $or: [ {state: 'espera toma'}, {state: 'en toma'}, {$and: [ {state: 're-call'} , {type: 'toma'} ]} ],
+                    $or: [ {state: 'espera toma'}, {state: 'en toma'}, {$and: [ {state: 're-call'} , {sourceSection: 'toma'} ]} ],
                 } },
                 { $sort: { creationDate: 1 } },
             ]);

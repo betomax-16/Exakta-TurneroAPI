@@ -6,9 +6,10 @@
   "scripts": {
     "build": "webpack --env production --mode production",
     "start": "webpack --env production --mode production && node ./build/index.js",
-    "dev": "nodemon",
-    "startDev": "set NODE_ENV=development && ts-node ./src/index.ts",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "set NODE_ENV=development&&nodemon",
+    "test": "set NODE_ENV=test&&nodemon",
+    "startDev": "ts-node ./src/index.ts",
+    "jest": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
   "license": "ISC",
