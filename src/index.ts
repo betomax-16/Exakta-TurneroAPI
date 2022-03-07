@@ -64,6 +64,15 @@ server.io.on("connection", async function(socket: socketio.Socket) {
     socket.on('disconnect', function () {
       console.log('A user disconnected ' + socket.id);
     });
+
+
+    socket.on('join-module', ({ sucursal, module }, callback) => {
+      socket.join(`${sucursal}-${module}`);
+    });
+
+    socket.on('refresh', ({ sucursal, module }, callback) => {
+      socket.broadcast.to(`${sucursal}-${module}`).emit('refresh');
+    });
 });
 
 server.http.listen(port, () => {

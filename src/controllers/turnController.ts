@@ -745,7 +745,15 @@ class TurnController {
                 sourceSection: 'toma'
             };
 
-            return await TurnController.createTrace('espera toma', data);
+            const traceTurn = await Trace.find({turn: turn, sucursal: sucursal, sourceSection: 'toma'});
+
+            if (traceTurn.length === 0) {
+                return await TurnController.createTrace('espera toma', data);    
+            }
+            else {
+                //shift attended by Beto
+                throw new Error(`Turno atendido por: ${traceTurn[0].username}`);
+            }
         } catch (error: any) {
             throw error;
         }
