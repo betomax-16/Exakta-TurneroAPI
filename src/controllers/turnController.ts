@@ -270,17 +270,119 @@ class TurnController {
             const dateInit = moment().hour(0).minute(0).second(0).millisecond(0).toDate();
             const dateFinish = moment().hour(23).minute(59).second(59).millisecond(999).toDate();
             const resModule = await moduleController.get(ubication, sucursal);
+            const existeTurnLast = await Trace.find({username: useraname, finalDate: { "$in": [ null, "" ] }});
             
-            if (resModule) {
-                if (resModule.mode === 'manual') {
-                    const res = await TurnController.manualTurn(area, sucursal, ubication, useraname, dateInit, dateFinish);
-                    await moduleController.update(ubication, sucursal, {status: true});
-                    return res;
-                }
-                else {
-                    if (resModule.isPrivilegeByArrivalTime) {
+            if (existeTurnLast.length === 0) {
+                if (resModule) {
+                    if (resModule.mode === 'manual') {
+                        const res = await TurnController.manualTurn(area, sucursal, ubication, useraname, dateInit, dateFinish);
+                        await moduleController.update(ubication, sucursal, {status: true});
+                        return res;
+                    }
+                    else {
+                        if (resModule.isPrivilegeByArrivalTime) {
+                            const resPrivilege = await modulePrivilegeController.get(resModule.id);
+                            if (resPrivilege) {
+                                const auxOrderData = resPrivilege.sort(function (a, b) {
+                                    if (a.privilege > b.privilege) {
+                                      return 1;
+                                    }
+                                    if (a.privilege < b.privilege) {
+                                      return -1;
+                                    }
+                                    // a = b
+                                    return 0;
+                                });
+    
+                                const lastShifts = [];
+                                for (let index = 0; index < auxOrderData.length; index++) {
+                                    if (auxOrderData[index].privilege > 0) {
+                                        const next = await TurnController.getNextTurn(auxOrderData[index].area, sucursal, dateInit, dateFinish);
+                                        if (next.length) {
+                                            lastShifts.push(next[0]);
+                                        }
+                                    }
+                                }
+    
+                                const lastShiftsOrderData = lastShifts.sort(function (a, b) {
+                                    
+                                    if (moment(a.creationDate) > moment(b.creationDate)) {
+                                      return 1;
+                                    }
+                                    if (moment(a.creationDate) < moment(b.creationDate)) {
+                                      return -1;
+                                    }
+                                    // a = b
+                                    return 0;
+                                });
+    
+                                
+                                if (lastShiftsOrderData.length) {
+                                    const data = {
+                                        turn: lastShiftsOrderData[0].turn,
+                                        ubication: ubication,
+                                        state: 'en atencion',
+                                        username: useraname,
+                                        sucursal: sucursal,
+                                        sourceSection: 'recepcion'
+                                    };
+                        
+                                    const res = await TurnController.createTrace('espera', data);
+                                    await moduleController.update(ubication, sucursal, {status: true});
+                                    return res;
+                                }
+                                else {
+                                    throw new Error("No shifts");
+                                }
+                            }
+                            // const next = await TurnController.getOldNextTurn(sucursal, dateInit, dateFinish);
+                            // if (next.length) {
+                            //     const data = {
+                            //         turn: next[0].turn,
+                            //         ubication: ubication,
+                            //         state: 'en atencion',
+                            //         username: useraname,
+                            //         sucursal: sucursal
+                            //     };
+                    
+                            //     const res = await TurnController.createTrace('espera', data);
+                            //     await moduleController.update(ubication, sucursal, {status: true});
+                            //     return res;
+                            // }
+                        }
+    
                         const resPrivilege = await modulePrivilegeController.get(resModule.id);
-                        if (resPrivilege) {
+    
+                        if (!resPrivilege || (resPrivilege && resPrivilege.length === 0)) {
+                            const areas = await areaSucursalController.get(sucursal);
+                            console.log("----------------------------------");
+                            console.log("Datos areas de una sucursal: ", areas);
+                            console.log("----------------------------------");
+                            if (areas) {
+                                // for (let index = 0; index < areas.length; index++) {
+                                //     const next = await TurnController.getNextTurn(areas[index].area, sucursal, dateInit, dateFinish);
+                                //     if (next.length) {
+                                //         const data = {
+                                //             turn: next[0].turn,
+                                //             ubication: ubication,
+                                //             state: 'en atencion',
+                                //             username: useraname,
+                                //             sucursal: sucursal
+                                //         };
+                            
+                                //         const res = await TurnController.createTrace('espera', data);
+                                //         await moduleController.update(ubication, sucursal, {status: true});
+                                //         return res;
+                                //     }
+                                // }
+        
+                                throw new Error("No shifts");
+                            }
+                            else {
+                                throw new Error(`Sucursal: ${sucursal} has no areas.`);
+                            }
+                        }
+                        else if (resPrivilege) {
                             const auxOrderData = resPrivilege.sort(function (a, b) {
                                 if (a.privilege > b.privilege) {
                                   return 1;
@@ -291,169 +393,73 @@ class TurnController {
                                 // a = b
                                 return 0;
                             });
-
-                            const lastShifts = [];
-                            for (let index = 0; index < auxOrderData.length; index++) {
-                                if (auxOrderData[index].privilege > 0) {
-                                    const next = await TurnController.getNextTurn(auxOrderData[index].area, sucursal, dateInit, dateFinish);
-                                    if (next.length) {
-                                        lastShifts.push(next[0]);
+    
+                            const areas = await areaSucursalController.get(sucursal);
+                            // let auxAreas: IAreaSucursal[] = [];
+    
+                            if (areas) {
+                                // areas.forEach(a => {
+                                //     const result = auxOrderData.find(i => i.area === a.area);
+                                //     if (!result) {
+                                //         auxAreas.push(a);
+                                //     }
+                                // });
+    
+                                for (let index = 0; index < auxOrderData.length; index++) {
+                                    if (auxOrderData[index].privilege > 0) {
+                                        const next = await TurnController.getNextTurn(auxOrderData[index].area, sucursal, dateInit, dateFinish);
+                                        if (next.length) {
+                                            const data = {
+                                                turn: next[0].turn,
+                                                ubication: ubication,
+                                                state: 'en atencion',
+                                                username: useraname,
+                                                sucursal: sucursal,
+                                                sourceSection: 'recepcion'
+                                            };
+                                
+                                            const res = await TurnController.createTrace('espera', data);
+                                            await moduleController.update(ubication, sucursal, {status: true});
+                                            return res;
+                                        }
                                     }
                                 }
-                            }
-
-                            const lastShiftsOrderData = lastShifts.sort(function (a, b) {
-                                
-                                if (moment(a.creationDate) > moment(b.creationDate)) {
-                                  return 1;
-                                }
-                                if (moment(a.creationDate) < moment(b.creationDate)) {
-                                  return -1;
-                                }
-                                // a = b
-                                return 0;
-                            });
-
+        
+        
+                                // for (let index = 0; index < auxAreas.length; index++) {
+                                //     const next = await TurnController.getNextTurn(auxAreas[index].area, sucursal, dateInit, dateFinish);
+                                //     if (next.length) {
+                                //         const data = {
+                                //             turn: next[0].turn,
+                                //             ubication: ubication,
+                                //             state: 'en atencion',
+                                //             username: useraname,
+                                //             sucursal: sucursal
+                                //         };
                             
-                            if (lastShiftsOrderData.length) {
-                                const data = {
-                                    turn: lastShiftsOrderData[0].turn,
-                                    ubication: ubication,
-                                    state: 'en atencion',
-                                    username: useraname,
-                                    sucursal: sucursal,
-                                    sourceSection: 'recepcion'
-                                };
-                    
-                                const res = await TurnController.createTrace('espera', data);
-                                await moduleController.update(ubication, sucursal, {status: true});
-                                return res;
+                                //         const res = await TurnController.createTrace('espera', data);
+                                //         await moduleController.update(ubication, sucursal, {status: true});
+                                //         return res;
+                                //     }
+                                // }
+        
+                                throw new Error("No shifts");  
                             }
                             else {
-                                throw new Error("No shifts");
-                            }
-                        }
-                        // const next = await TurnController.getOldNextTurn(sucursal, dateInit, dateFinish);
-                        // if (next.length) {
-                        //     const data = {
-                        //         turn: next[0].turn,
-                        //         ubication: ubication,
-                        //         state: 'en atencion',
-                        //         username: useraname,
-                        //         sucursal: sucursal
-                        //     };
-                
-                        //     const res = await TurnController.createTrace('espera', data);
-                        //     await moduleController.update(ubication, sucursal, {status: true});
-                        //     return res;
-                        // }
-                    }
-
-                    const resPrivilege = await modulePrivilegeController.get(resModule.id);
-
-                    if (!resPrivilege || (resPrivilege && resPrivilege.length === 0)) {
-                        const areas = await areaSucursalController.get(sucursal);
-                        console.log("----------------------------------");
-                        console.log("Datos areas de una sucursal: ", areas);
-                        console.log("----------------------------------");
-                        if (areas) {
-                            // for (let index = 0; index < areas.length; index++) {
-                            //     const next = await TurnController.getNextTurn(areas[index].area, sucursal, dateInit, dateFinish);
-                            //     if (next.length) {
-                            //         const data = {
-                            //             turn: next[0].turn,
-                            //             ubication: ubication,
-                            //             state: 'en atencion',
-                            //             username: useraname,
-                            //             sucursal: sucursal
-                            //         };
-                        
-                            //         const res = await TurnController.createTrace('espera', data);
-                            //         await moduleController.update(ubication, sucursal, {status: true});
-                            //         return res;
-                            //     }
-                            // }
-    
-                            throw new Error("No shifts");
+                                throw new Error(`Sucursal: ${sucursal} has no areas.`);
+                            }                     
                         }
                         else {
-                            throw new Error(`Sucursal: ${sucursal} has no areas.`);
+                            throw new Error(`Unhandled exception in privileges.`);
                         }
                     }
-                    else if (resPrivilege) {
-                        const auxOrderData = resPrivilege.sort(function (a, b) {
-                            if (a.privilege > b.privilege) {
-                              return 1;
-                            }
-                            if (a.privilege < b.privilege) {
-                              return -1;
-                            }
-                            // a = b
-                            return 0;
-                        });
-
-                        const areas = await areaSucursalController.get(sucursal);
-                        // let auxAreas: IAreaSucursal[] = [];
-
-                        if (areas) {
-                            // areas.forEach(a => {
-                            //     const result = auxOrderData.find(i => i.area === a.area);
-                            //     if (!result) {
-                            //         auxAreas.push(a);
-                            //     }
-                            // });
-
-                            for (let index = 0; index < auxOrderData.length; index++) {
-                                if (auxOrderData[index].privilege > 0) {
-                                    const next = await TurnController.getNextTurn(auxOrderData[index].area, sucursal, dateInit, dateFinish);
-                                    if (next.length) {
-                                        const data = {
-                                            turn: next[0].turn,
-                                            ubication: ubication,
-                                            state: 'en atencion',
-                                            username: useraname,
-                                            sucursal: sucursal,
-                                            sourceSection: 'recepcion'
-                                        };
-                            
-                                        const res = await TurnController.createTrace('espera', data);
-                                        await moduleController.update(ubication, sucursal, {status: true});
-                                        return res;
-                                    }
-                                }
-                            }
-    
-    
-                            // for (let index = 0; index < auxAreas.length; index++) {
-                            //     const next = await TurnController.getNextTurn(auxAreas[index].area, sucursal, dateInit, dateFinish);
-                            //     if (next.length) {
-                            //         const data = {
-                            //             turn: next[0].turn,
-                            //             ubication: ubication,
-                            //             state: 'en atencion',
-                            //             username: useraname,
-                            //             sucursal: sucursal
-                            //         };
-                        
-                            //         const res = await TurnController.createTrace('espera', data);
-                            //         await moduleController.update(ubication, sucursal, {status: true});
-                            //         return res;
-                            //     }
-                            // }
-    
-                            throw new Error("No shifts");  
-                        }
-                        else {
-                            throw new Error(`Sucursal: ${sucursal} has no areas.`);
-                        }                     
-                    }
-                    else {
-                        throw new Error(`Unhandled exception in privileges.`);
-                    }
+                }
+                else {
+                    throw new Error("Module not found.");
                 }
             }
             else {
-                throw new Error("Module not found.");
+                throw new Error("Module with turn.");
             }
         } catch (error: any) {
             throw error;
