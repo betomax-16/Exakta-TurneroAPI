@@ -616,7 +616,7 @@ class TurnController {
     static async getAssistanceTraces(sucursal: string, area?: string|string[], turn?: string): Promise<any[]|null> {
         try {
             let query: any = { 
-                $or: [ {state: 'espera toma'}, {state: 'en toma'}, {$and: [ {state: 're-call'} , {type: 'toma'} ]} ],
+                $or: [ {state: 'espera toma'}, {state: 'en toma'}, {$and: [ {state: 're-call'} , {sourceSection: 'toma'} ]} ],
             };
 
             if (area) {
@@ -680,6 +680,7 @@ class TurnController {
                     "createdAt": 1,
                     "ubication": 1,
                     "username": 1,
+                    "sourceSection": 1,
                     "area": "$data-turn.area"
                 }},
                 { $lookup: {
@@ -698,6 +699,7 @@ class TurnController {
                     "sucursal": 1,
                     "startDate": 1,
                     "area": 1,
+                    "sourceSection": 1,
                     "username": 1,
                 }},
                 { $match: query },
