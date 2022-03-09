@@ -543,8 +543,15 @@ class TurnController {
         }
     }
 
-    static async getAssistanceShifts(sucursal: string): Promise<any[]|null> {
+    static async getAssistanceShifts(sucursal: string, area?: string): Promise<any[]|null> {
         try {
+            let query: any = { 
+                $or: [ {state: 'espera toma'}, {state: 'en toma'}, {$and: [ {state: 're-call'} , {sourceSection: 'toma'} ]} ],
+            };
+            if (area) {
+                query.area = area;
+            }
+
             const dateInit = moment().hour(0).minute(0).second(0).millisecond(0).toDate();
             const dateFinish = moment().hour(23).minute(59).second(59).millisecond(999).toDate();
             
@@ -598,9 +605,7 @@ class TurnController {
                     "creationDate": "$startDate",
                     "prefix": "$data-area.prefix",
                 }},
-                { $match: { 
-                    $or: [ {state: 'espera toma'}, {state: 'en toma'}, {$and: [ {state: 're-call'} , {sourceSection: 'toma'} ]} ],
-                } },
+                { $match: query },
                 { $sort: { creationDate: 1 } },
             ]);
         } catch (error: any) {
@@ -608,8 +613,20 @@ class TurnController {
         }
     }
 
-    static async getAssistanceTraces(sucursal: string): Promise<any[]|null> {
+    static async getAssistanceTraces(sucursal: string, area?: string, turn?: string): Promise<any[]|null> {
         try {
+            let query: any = { 
+                $or: [ {state: 'espera toma'}, {state: 'en toma'}, {$and: [ {state: 're-call'} , {type: 'toma'} ]} ],
+            };
+
+            if (area) {
+                query.area = area;
+            }
+
+            if (turn) {
+                query.turn = turn;
+            }
+
             const dateInit = moment().hour(0).minute(0).second(0).millisecond(0).toDate();
             const dateFinish = moment().hour(23).minute(59).second(59).millisecond(999).toDate();
             
@@ -654,6 +671,7 @@ class TurnController {
                     "data-module": 1,
                     "createdAt": 1,
                     "ubication": 1,
+                    "username": 1,
                     "area": "$data-turn.area"
                 }},
                 { $lookup: {
@@ -670,11 +688,11 @@ class TurnController {
                     "ubication": 1,
                     "state": 1,
                     "sucursal": 1,
-                    "startDate": 1
+                    "startDate": 1,
+                    "area": 1,
+                    "username": 1,
                 }},
-                { $match: { 
-                    $or: [ {state: 'espera toma'}, {state: 'en toma'}, {$and: [ {state: 're-call'} , {type: 'toma'} ]} ],
-                } },
+                { $match: query },
                 { $sort: { startDate: 1 } },
             ]);
         } catch (error: any) {
@@ -748,6 +766,9 @@ class TurnController {
             const traceTurn = await Trace.find({turn: turn, sucursal: sucursal, sourceSection: 'toma'});
 
             if (traceTurn.length === 0) {
+                return await TurnController.createTrace('espera toma', data);    
+            }
+            else if (traceTurn.find(t => t.state === 'espera toma')) {
                 return await TurnController.createTrace('espera toma', data);    
             }
             else {

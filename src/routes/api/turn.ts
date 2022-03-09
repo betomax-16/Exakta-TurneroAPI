@@ -246,7 +246,8 @@ class TurnRoutes {
 
     async getAssistanceShifts(req: Request, res: Response) {
         try {
-            const result = await turnController.getAssistanceShifts(req.params.suc);
+            const area: any = req.query.area;
+            const result = await turnController.getAssistanceShifts(req.params.suc, area);
             ResponseWrapper.handler(res, result, 200);
         } catch (error: any) {
             Errors.handler(error, res);
@@ -255,7 +256,9 @@ class TurnRoutes {
 
     async getAssistanceTraces(req: Request, res: Response) {
         try {
-            const result = await turnController.getAssistanceTraces(req.params.suc);
+            const area: any = req.query.area;
+            const turn: any = req.query.turn;
+            const result = await turnController.getAssistanceTraces(req.params.suc, area, turn);
             ResponseWrapper.handler(res, result, 200);
         } catch (error: any) {
             Errors.handler(error, res);
