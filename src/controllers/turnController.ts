@@ -613,14 +613,22 @@ class TurnController {
         }
     }
 
-    static async getAssistanceTraces(sucursal: string, area?: string, turn?: string): Promise<any[]|null> {
+    static async getAssistanceTraces(sucursal: string, area?: string|string[], turn?: string): Promise<any[]|null> {
         try {
             let query: any = { 
                 $or: [ {state: 'espera toma'}, {state: 'en toma'}, {$and: [ {state: 're-call'} , {type: 'toma'} ]} ],
             };
 
             if (area) {
-                query.area = area;
+                if (Array.isArray(area)) {
+                    query['$or'] = [];
+                    area.forEach(element => {
+                        query['$or'].push({area: element});
+                    });
+                }
+                else {
+                    query.area = area;
+                }
             }
 
             if (turn) {
