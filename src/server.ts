@@ -3,7 +3,7 @@ import mongoose from "mongoose";
 // import router from './routes';
 import routerApi from './routes/api';
 import path from "path";
-import CronTask, { reset, clearHistories } from './utils/cronTask';
+import CronTask, { reset, clearHistories, logout } from './utils/cronTask';
 import http from "http";
 import socketio from "socket.io";
 import dotenv from "dotenv";
@@ -79,7 +79,7 @@ class Server {
     });
 
     //CRON para reset de los turnos
-    new CronTask([reset, clearHistories]);
+    new CronTask([reset, clearHistories, logout]);
     this.app.use(cors());
     // para aceder a los recursos de static la ruta seria "localhost:{port}/{direccion del recurso a buscar}"
     this.app.use('/', express.static(path.join(__dirname, 'static')));

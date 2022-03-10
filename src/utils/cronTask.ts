@@ -49,3 +49,20 @@ export function clearHistories() {
         cronJob.start();
     }
 }
+
+export function logout() {
+  //0 0 * * * -> todos los dias a las 9PM
+  const cronJob: CronJob = new CronJob('0 21 * * *', async () => {
+    try {
+      const date = moment();
+      await traceTurnController.logout();
+      console.log({message: 'Successful logout.', date: date.toString()});
+    } catch (e) {
+      console.error(e);
+    }
+  });
+
+  if (!cronJob.running) {
+    cronJob.start();
+  }
+}

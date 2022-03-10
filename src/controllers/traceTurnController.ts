@@ -1,5 +1,6 @@
 import TraceHistory from "../models/traceHistory";
 import TraceTurn, { ITraceTurn } from '../models/traceTurn';
+import Module from "../models/module";
 import moment from "moment";
 import { IQueryRequest, getQueriesMongo } from "../models/utils/queryRequest";
 
@@ -119,6 +120,15 @@ class TraceHistoryController {
                 { deleteMany: { filter: {} } }  
             ]);
             
+            return true;
+        } catch (error) {
+            throw error;
+        }
+    }
+
+    static async logout(): Promise<boolean> {
+        try {
+            await Module.updateMany({}, {status: false, username: ''});
             return true;
         } catch (error) {
             throw error;
