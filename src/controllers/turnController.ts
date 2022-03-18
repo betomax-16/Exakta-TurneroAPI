@@ -112,7 +112,9 @@ class TurnController {
                 
                 let traceRes: any = {};
                 if (res.modifiedCount == 1) {
+                    const resultTurn = await TurnController.get(trace.turn, trace.sucursal);
                     trace.startDate = dateTrace;
+                    trace.idTurn = resultTurn?._id;
                     if (trace.state === 'cancelado' || trace.state === 'terminado') {
                         trace.finalDate = dateTrace;
                         trace.ubication = 'salida';
@@ -190,6 +192,7 @@ class TurnController {
             let traceRes: any = {};
             if (newTurn) {
                 const trace = {
+                    idTurn: newTurn._id,
                     turn: next,
                     startDate: dateInit,
                     ubication: 'recepcion',

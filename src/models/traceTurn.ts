@@ -3,6 +3,7 @@ import turnController from "../controllers/turnController";
 import turnStateController from "../controllers/turnStateController";
 
 export interface ITraceTurn extends Document {
+    idTurn: Schema.Types.ObjectId;
     turn: string; 
     startDate: Date;
     ubication: string;
@@ -14,6 +15,7 @@ export interface ITraceTurn extends Document {
 }
 
 const TraceTurnSchema: Schema<ITraceTurn> = new Schema<ITraceTurn>({
+    idTurn: { type: Schema.Types.ObjectId, required: true },
     turn: { type: String, required: true },
     startDate: { type: Date, required: true },
     ubication: { type: String, required: true },

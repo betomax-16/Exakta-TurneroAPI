@@ -26,10 +26,10 @@ class TraceHistoryController {
                         value: sucursal
                     });
                 }
-    
+                
                 myQuery = getQueriesMongo(queries);
             }
-
+            
             return await TraceHistory.find(myQuery); 
 
             // let firstD: moment.Moment = moment(firstDate, ["MM-DD-YYYY", "YYYY-MM-DD"]);
@@ -100,8 +100,8 @@ class TraceHistoryController {
                 {
                     $lookup: {
                          from: "TurnHistory",
-                         localField: "turn",
-                         foreignField: "turn",
+                         localField: "idTurn",
+                         foreignField: "_id",
                          as: "dataTurn"
                     }
                 },
@@ -257,8 +257,8 @@ class TraceHistoryController {
                 {
                     $lookup: {
                          from: "TurnHistory",
-                         localField: "turn",
-                         foreignField: "turn",
+                         localField: "idTurn",
+                         foreignField: "_id",
                          as: "dataTurn"
                     }
                 },
@@ -439,7 +439,7 @@ class TraceHistoryController {
     static async detailedReport(startDate: Date, finalDate: Date, sucursal?: string, area?: string) :Promise<any[]> {
         try {
             const query: any[] = [ { startDate: { '$gte': startDate } }, { finalDate: { '$lte': finalDate } } ];
-
+            
             if (sucursal) {
                 let str = diacriticSensitiveRegex(sucursal);
                 query.push({ sucursal: { $regex: `^${str}$`, $options: "i" } });
@@ -458,8 +458,8 @@ class TraceHistoryController {
                 {
                     $lookup: {
                          from: "TurnHistory",
-                         localField: "turn",
-                         foreignField: "turn",
+                         localField: "idTurn",
+                         foreignField: "_id",
                          as: "dataTurn"
                     }
                 },
@@ -507,16 +507,30 @@ class TraceHistoryController {
                 }
             });
 
+            console.log(table.length);
+            
             let resum: any[] = [];
             sucursals.forEach(suc => {
+                console.log(`=============${suc}=============`);
                 const dataSucursal = table.filter(r => r.sucursal === suc);
                 const shifts = dataSucursal.filter(r => r.state === 'espera');
-
+                console.log(`Suc: ${dataSucursal.length}`);
+                console.log(`Turns: ${shifts.length}`);
+                
                 shifts.forEach(turn => {
+                    console.log(`------------${turn.turn}-----------`);
                     const traces = dataSucursal.filter(r => 
                         r.turn === turn.turn && 
                         moment(turn.startDate).format('YYYY-MM-DD') === moment(r.startDate).format('YYYY-MM-DD'));
-                    
+                        
+                        // if (traces.length && traces[0].turn === 'L001') {
+                        //     const data = {
+                        //         turn: traces[0].turn,
+                        //         date: moment(traces[0].startDate).format('YYYY-MM-DD')
+                        //     };
+                        //     console.log(data);
+                        // }
+
                         let waitTime: number = 0;
                         let attentionTime: number = 0;
                         let hourFinish: string = '';

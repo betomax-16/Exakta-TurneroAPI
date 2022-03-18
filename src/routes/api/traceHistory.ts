@@ -30,8 +30,9 @@ class TraceHistoryRoutes {
 
     async get(req: Request, res: Response) {
         try {
+            const jwt = (req as any).jwtPayload;
             const auxQueries: IQueryRequest[] = getQueries(req);
-            const result = await traceHistoryController.get(auxQueries);
+            const result = await traceHistoryController.get(jwt, auxQueries);
             ResponseWrapper.handler(res, result, 200);
 
             // const firstDate = moment(req.query.firstDate?.toString(), ["MM-DD-YYYY", "YYYY-MM-DD"]);
