@@ -143,14 +143,19 @@ class TurnRoutes {
         try {
             const { area, sucursal } = req.body;
             const auxReq: any = req;
-            const username = auxReq.jwtPayload.username;
-            const resultModule = await moduleController.getByUser(username);
-            if (resultModule) {
-                const result = await turnController.nextTurn(area, sucursal, resultModule.name, username);
-                ResponseWrapper.handler(res, result, 201);
+            const { username, rol } = auxReq.jwtPayload;
+            if (rol.toLowerCase() === 'recepcionista') {
+                const resultModule = await moduleController.getByUser(username);
+                if (resultModule) {
+                    const result = await turnController.nextTurn(area, sucursal, resultModule.name, username);
+                    ResponseWrapper.handler(res, result, 201);
+                }
+                else {
+                    throw new Error(`The user ${username} is not in a module`);
+                }
             }
             else {
-                throw new Error(`The user ${username} is not in a module`);
+                throw new Error(`The user ${username} is not a "Receptionist"`);
             }
         } catch (error: any) {
             Errors.handler(error, res);
@@ -184,9 +189,11 @@ class TurnRoutes {
             const auxReq: any = req;
             const uname = auxReq.jwtPayload ? auxReq.jwtPayload.username : username;
             if (uname) {
-                const resultModule = await moduleController.getByUser(uname);
-                if (resultModule) {
-                    auxUbication = resultModule.name;   
+                if (!ubication) {
+                    const resultModule = await moduleController.getByUser(uname);
+                    if (resultModule) {
+                        auxUbication = resultModule.name;   
+                    }
                 }
             }
             const result = await turnController.reCallTurn(turn, sucursal, auxUbication, source, uname);

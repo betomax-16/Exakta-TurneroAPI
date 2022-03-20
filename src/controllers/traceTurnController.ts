@@ -4,7 +4,7 @@ import Module from "../models/module";
 import moment from "moment";
 import { IQueryRequest, getQueriesMongo } from "../models/utils/queryRequest";
 
-class TraceHistoryController {
+class TraceController {
 
     // agragar filtros
     static async getAll(jwt: any, queries: IQueryRequest[]|null = null): Promise<ITraceTurn[]|null> {
@@ -136,4 +136,4 @@ class TraceHistoryController {
     }
 }
 
-export default TraceHistoryController;
+export default TraceController;

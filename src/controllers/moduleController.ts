@@ -12,10 +12,10 @@ class ModuleController {
                 const { username, rol, sucursal } = jwt;
                 myQuery = getQueriesMongo(queries);
                 
-                let suc: any = null;
-                if (queries) {
-                    suc = queries.find(q => q.field === 'sucursal');
-                }
+                // let suc: any = null;
+                // if (queries) {
+                //     suc = queries.find(q => q.field === 'sucursal');
+                // }
                 
                 switch (rol) {
                     case 'Admin':
