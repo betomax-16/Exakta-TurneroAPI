@@ -2,6 +2,7 @@ import TraceHistory from "../models/traceHistory";
 import TraceTurn, { ITraceTurn } from '../models/traceTurn';
 import Module from "../models/module";
 import moment from "moment";
+import {ClientSession} from "mongoose";
 import { IQueryRequest, getQueriesMongo } from "../models/utils/queryRequest";
 
 class TraceController {
@@ -70,26 +71,26 @@ class TraceController {
         }
     }
 
-    static async create(data: ITraceTurn|any): Promise<ITraceTurn|null> {
+    static async create(data: ITraceTurn|any, session?: ClientSession): Promise<any|null> {
         try {
-            const newTurnState: ITraceTurn = new TraceTurn(data);    
-            return await newTurnState.save();
+            const result = await TraceTurn.create([{...data}], { session });
+            return result[0];
         } catch (error) {
             throw error;
         }
     }
 
-    static async update(turn: string, sucursal: string, state: string, data: ITraceTurn|any): Promise<any|null> {
+    static async update(turn: string, sucursal: string, state: string, data: ITraceTurn|any, session?: ClientSession): Promise<any|null> {
         if (data._id) {
             delete data._id;
         }
 
         try {
             if (data.state && (data.state === 'cancelado' || data.state === 'terminado' || data.state === 're-call')) {
-                return await TraceTurn.updateOne({turn: turn, sucursal: sucursal, finalDate: null}, { $set: {finalDate: data.finalDate} });
+                return await TraceTurn.updateOne({turn: turn, sucursal: sucursal, finalDate: null}, { $set: {finalDate: data.finalDate} }, {session});
             }
             else {
-                return await TraceTurn.updateOne({turn: turn, sucursal: sucursal, $or: [{state: state}, {rol: 're-call'}], finalDate: null}, { $set: {finalDate: data.finalDate} });
+                return await TraceTurn.updateOne({turn: turn, sucursal: sucursal, $or: [{state: state}, {rol: 're-call'}], finalDate: null}, { $set: {finalDate: data.finalDate} }, {session});
             }
         } catch (error: any) {
             throw error;
@@ -104,9 +105,10 @@ class TraceController {
         }
     }
 
-    static async migration(): Promise<boolean> {
+    static async migration(sucursal?: string): Promise<boolean> {
         try {
-            const res = await TraceTurn.find({});
+            const querySuc = sucursal ? {sucursal: sucursal} : {};
+            const res = await TraceTurn.find(querySuc);
             const query: any[] = [];
             res.forEach(element => {
                 const auxItem: any = {};
@@ -117,7 +119,7 @@ class TraceController {
             await TraceHistory.bulkWrite(query);
 
             await TraceTurn.bulkWrite([
-                { deleteMany: { filter: {} } }  
+                { deleteMany: { filter: querySuc } }  
             ]);
             
             return true;

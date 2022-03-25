@@ -1,4 +1,4 @@
-import { Types } from "mongoose";
+import { Types, ClientSession } from "mongoose";
 import ModulePrivilege, { IModulePrivilege } from '../models/modulePrivilege';
 
 class ModulePrivilegeController {
@@ -11,9 +11,9 @@ class ModulePrivilegeController {
         }
     }
 
-    static async get(moduleId: string): Promise<IModulePrivilege[]|null> {
+    static async get(moduleId: string, session: ClientSession|null = null): Promise<IModulePrivilege[]|null> {
         try {
-            return await ModulePrivilege.find({moduleId: new Types.ObjectId(moduleId)});
+            return await ModulePrivilege.find({moduleId: new Types.ObjectId(moduleId)}).session(session);
         } catch (error) {
             throw error;
         }

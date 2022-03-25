@@ -1,4 +1,5 @@
 import AreaSucursal, { IAreaSucursal } from '../models/areaSucursal';
+import { ClientSession } from "mongoose";
 
 class AreaSucursalController {
 
@@ -10,9 +11,9 @@ class AreaSucursalController {
         }
     }
 
-    static async get(sucursal: string): Promise<IAreaSucursal[]|null> {
+    static async get(sucursal: string, session: ClientSession|null = null): Promise<IAreaSucursal[]|null> {
         try {
-            return await AreaSucursal.find({sucursal: sucursal});
+            return await AreaSucursal.find({sucursal: sucursal}).session(session);
         } catch (error) {
             throw error;
         }

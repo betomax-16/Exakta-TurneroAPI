@@ -36,7 +36,7 @@ class Server {
     this.http = http.createServer(this.app);
     this.io = new socketio.Server(this.http, {
       cors: {
-        origin: ["http://localhost:3000", "http://192.168.1.14:3000", "http://192.168.100.17:3000"],
+        origin: ["http://localhost:3000", "http://192.168.1.14:3000", "http://192.168.100.17:3000", 'http://192.168.1.237:3000'],
         methods: ["GET", "POST"],
       }
     });
@@ -63,7 +63,7 @@ class Server {
     }
     else if (MODE === 'DEV') {
       dataBase = MONGO_URI_DEV;
-      mongoose.connect(MONGO_URI_DEV || '');
+      mongoose.connect(MONGO_URI_DEV || '', { replicaSet: 'testrep' });
     }
 
     const db = mongoose.connection;
@@ -75,7 +75,7 @@ class Server {
     db.once('open', function(){
       console.log(`Mode: ${MODE}`);
       console.log(`Connection to DB successful on: ${dataBase}`);
-      new initDB();
+      // new initDB();
     });
 
     //CRON para reset de los turnos

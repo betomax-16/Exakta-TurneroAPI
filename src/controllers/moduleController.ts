@@ -1,6 +1,7 @@
 import Module, { IModule } from '../models/module';
 import { IQueryRequest, getQueriesMongo } from "../models/utils/queryRequest";
 import supervisorController from "./supervisorController";
+import {ClientSession} from "mongoose";
 
 class ModuleController {
 
@@ -93,7 +94,7 @@ class ModuleController {
         }
     }
 
-    static async update(name: string, suc: string, data: IModule|any): Promise<any|null> {
+    static async update(name: string, suc: string, data: IModule|any, session?: ClientSession): Promise<any|null> {
         if (data._id) {
             delete data._id;
         }
@@ -101,7 +102,7 @@ class ModuleController {
         const auxData: any = data;
         delete auxData.name;
         try {
-            return await Module.updateOne({name: name, sucursal: suc}, { $set: auxData });
+            return await Module.updateOne({name: name, sucursal: suc}, { $set: auxData }, {session});
         } catch (error: any) {
             throw error;
         }

@@ -1,4 +1,5 @@
 import moment from "moment";
+import mongoose, {ClientSession} from "mongoose";
 import Turn, { ITurn } from '../models/turn';
 import TurnHistory from "../models/turnHistory";
 import Trace, { ITraceTurn } from "../models/traceTurn";
@@ -8,7 +9,6 @@ import { IQueryRequest, getQueriesMongo } from "../models/utils/queryRequest";
 import moduleController from "../controllers/moduleController";
 import modulePrivilegeController from "../controllers/modulePrivilegeController";
 import areaSucursalController from "../controllers/areaSucursalController";
-import { IAreaSucursal } from "../models/areaSucursal";
 
 class TurnController {
 
@@ -50,9 +50,9 @@ class TurnController {
         }
     }
 
-    static async get(turn: string, sucursal: string): Promise<ITurn|null> {
+    static async get(turn: string, sucursal: string, session: ClientSession|null = null): Promise<ITurn|null> {
         try {
-            return await Turn.findOne({turn: turn, sucursal: sucursal});
+            return await Turn.findOne({turn: turn, sucursal: sucursal}).session(session);
         } catch (error) {
             throw error;
         }
@@ -67,7 +67,7 @@ class TurnController {
         }
     }
 
-    static async update(turn: string, sucursal: string, data: ITurn|any): Promise<any|null> {
+    static async update(turn: string, sucursal: string, data: ITurn|any, session?: ClientSession): Promise<any|null> {
         if (data._id) {
             delete data._id;
         }
@@ -79,7 +79,7 @@ class TurnController {
         delete auxTurn.sucursal;
 
         try {
-            return await Turn.updateOne({turn: turn, sucursal: sucursal}, { $set: auxTurn });
+            return await Turn.updateOne({turn: turn, sucursal: sucursal}, { $set: auxTurn }, {session});
         } catch (error: any) {
             throw error;
         }
@@ -101,28 +101,28 @@ class TurnController {
         }
     }
 
-    private static async createTrace(oldState: string, trace: ITraceTurn|any): Promise<any|null> {
+    private static async createTrace(oldState: string, trace: ITraceTurn|any, session?: ClientSession): Promise<any|null> {
         try {
-            const result = await TurnController.update(trace.turn, trace.sucursal, {state: trace.state});
+            const result = await TurnController.update(trace.turn, trace.sucursal, {state: trace.state}, session);
             if ((result.modifiedCount && result.modifiedCount == 1) || trace.state === 're-call') {
                 const dateTrace = moment().toDate();
                 const data: any = { finalDate: dateTrace, state: trace.state };
 
-                const res = await traceTurnController.update(trace.turn, trace.sucursal, oldState, data);
+                const res = await traceTurnController.update(trace.turn, trace.sucursal, oldState, data, session);
                 
                 let traceRes: any = {};
                 if (res.modifiedCount == 1) {
-                    const resultTurn = await TurnController.get(trace.turn, trace.sucursal);
+                    const resultTurn = await TurnController.get(trace.turn, trace.sucursal, session);
                     trace.startDate = dateTrace;
                     trace.idTurn = resultTurn?._id;
                     if (trace.state === 'cancelado' || trace.state === 'terminado') {
                         trace.finalDate = dateTrace;
                         trace.ubication = 'salida';
                     }
-                    traceRes = await traceTurnController.create(trace);   
+                    traceRes = await traceTurnController.create(trace, session);   
                 }
 
-                const turn = await TurnController.get(trace.turn, trace.sucursal);
+                const turn = await TurnController.get(trace.turn, trace.sucursal, session);
                 return {
                     turn: turn,
                     trace: traceRes
@@ -213,7 +213,7 @@ class TurnController {
     }
 
 
-    static async getNextTurn(area: string, sucursal: string, dateInit: Date, dateFinish: Date): Promise<any|null> {
+    static async getNextTurn(area: string, sucursal: string, dateInit: Date, dateFinish: Date, session: ClientSession): Promise<any|null> {
         const next = await Turn.aggregate([
             { $lookup: {
                     from: "areas",
@@ -243,13 +243,13 @@ class TurnController {
                 "creationDate": 1,
                 "prefix": "$data-area.prefix"
             }}
-        ]);
+        ]).option({ session: session });
 
         return next;
     }
 
-    static async manualTurn(area: string, sucursal: string, ubication: string, useraname: string, dateInit: Date, dateFinish: Date): Promise<ITurn|null> {
-        const next = await TurnController.getNextTurn(area, sucursal, dateInit, dateFinish);
+    static async manualTurn(area: string, sucursal: string, ubication: string, useraname: string, dateInit: Date, dateFinish: Date, session: ClientSession): Promise<ITurn|null> {
+        const next = await TurnController.getNextTurn(area, sucursal, dateInit, dateFinish, session);
         
         if (next.length) {
             const data = {
@@ -261,7 +261,7 @@ class TurnController {
                 sourceSection: 'recepcion'
             };
 
-            return await TurnController.createTrace('espera', data);
+            return await TurnController.createTrace('espera', data, session);
         }
         else {
             throw new Error("No shifts");
@@ -269,6 +269,7 @@ class TurnController {
     }
 
     static async nextTurn(area: string, sucursal: string, ubication: string, useraname: string): Promise<ITurn|null> {
+        const session = await mongoose.startSession();
         try {
             const dateInit = moment().hour(0).minute(0).second(0).millisecond(0).toDate();
             const dateFinish = moment().hour(23).minute(59).second(59).millisecond(999).toDate();
@@ -277,14 +278,18 @@ class TurnController {
             
             if (existeTurnLast.length === 0) {
                 if (resModule) {
+                    await session.startTransaction();
                     if (resModule.mode === 'manual') {
-                        const res = await TurnController.manualTurn(area, sucursal, ubication, useraname, dateInit, dateFinish);
-                        await moduleController.update(ubication, sucursal, {status: true});
+                        const res = await TurnController.manualTurn(area, sucursal, ubication, useraname, dateInit, dateFinish, session);
+                        await moduleController.update(ubication, sucursal, {status: true}, session);
+                        if (await session.inTransaction()) {
+                            await session.commitTransaction();
+                        }
                         return res;
                     }
                     else {
                         if (resModule.isPrivilegeByArrivalTime) {
-                            const resPrivilege = await modulePrivilegeController.get(resModule.id);
+                            const resPrivilege = await modulePrivilegeController.get(resModule.id, session);
                             if (resPrivilege) {
                                 const auxOrderData = resPrivilege.sort(function (a, b) {
                                     if (a.privilege > b.privilege) {
@@ -300,7 +305,7 @@ class TurnController {
                                 const lastShifts = [];
                                 for (let index = 0; index < auxOrderData.length; index++) {
                                     if (auxOrderData[index].privilege > 0) {
-                                        const next = await TurnController.getNextTurn(auxOrderData[index].area, sucursal, dateInit, dateFinish);
+                                        const next = await TurnController.getNextTurn(auxOrderData[index].area, sucursal, dateInit, dateFinish, session);
                                         if (next.length) {
                                             lastShifts.push(next[0]);
                                         }
@@ -330,11 +335,18 @@ class TurnController {
                                         sourceSection: 'recepcion'
                                     };
                         
-                                    const res = await TurnController.createTrace('espera', data);
-                                    await moduleController.update(ubication, sucursal, {status: true});
+                                    const res = await TurnController.createTrace('espera', data, session);
+                                    await moduleController.update(ubication, sucursal, {status: true}, session);
+                                    if (await session.inTransaction()) {
+                                        await session.commitTransaction();
+                                    }
                                     return res;
                                 }
                                 else {
+                                    if (await session.inTransaction()) {
+                                        await session.abortTransaction();
+                                    }
+
                                     throw new Error("No shifts");
                                 }
                             }
@@ -354,10 +366,10 @@ class TurnController {
                             // }
                         }
     
-                        const resPrivilege = await modulePrivilegeController.get(resModule.id);
+                        const resPrivilege = await modulePrivilegeController.get(resModule.id, session);
     
                         if (!resPrivilege || (resPrivilege && resPrivilege.length === 0)) {
-                            const areas = await areaSucursalController.get(sucursal);
+                            const areas = await areaSucursalController.get(sucursal, session);
                             console.log("----------------------------------");
                             console.log("Datos areas de una sucursal: ", areas);
                             console.log("----------------------------------");
@@ -378,10 +390,17 @@ class TurnController {
                                 //         return res;
                                 //     }
                                 // }
-        
+                                if (await session.inTransaction()) {
+                                    await session.abortTransaction();
+                                }
+
                                 throw new Error("No shifts");
                             }
                             else {
+                                if (await session.inTransaction()) {
+                                    await session.abortTransaction();
+                                }
+
                                 throw new Error(`Sucursal: ${sucursal} has no areas.`);
                             }
                         }
@@ -397,7 +416,7 @@ class TurnController {
                                 return 0;
                             });
     
-                            const areas = await areaSucursalController.get(sucursal);
+                            const areas = await areaSucursalController.get(sucursal, session);
                             // let auxAreas: IAreaSucursal[] = [];
     
                             if (areas) {
@@ -410,7 +429,7 @@ class TurnController {
     
                                 for (let index = 0; index < auxOrderData.length; index++) {
                                     if (auxOrderData[index].privilege > 0) {
-                                        const next = await TurnController.getNextTurn(auxOrderData[index].area, sucursal, dateInit, dateFinish);
+                                        const next = await TurnController.getNextTurn(auxOrderData[index].area, sucursal, dateInit, dateFinish, session);
                                         if (next.length) {
                                             const data = {
                                                 turn: next[0].turn,
@@ -421,8 +440,11 @@ class TurnController {
                                                 sourceSection: 'recepcion'
                                             };
                                 
-                                            const res = await TurnController.createTrace('espera', data);
-                                            await moduleController.update(ubication, sucursal, {status: true});
+                                            const res = await TurnController.createTrace('espera', data, session);
+                                            await moduleController.update(ubication, sucursal, {status: true}, session);
+                                            if (await session.inTransaction()) {
+                                                await session.commitTransaction();
+                                            }
                                             return res;
                                         }
                                     }
@@ -445,14 +467,25 @@ class TurnController {
                                 //         return res;
                                 //     }
                                 // }
-        
+                                if (await session.inTransaction()) {
+                                    await session.abortTransaction();
+                                }
+
                                 throw new Error("No shifts");  
                             }
                             else {
+                                if (await session.inTransaction()) {
+                                    await session.abortTransaction();
+                                }
+
                                 throw new Error(`Sucursal: ${sucursal} has no areas.`);
                             }                     
                         }
                         else {
+                            if (await session.inTransaction()) {
+                                await session.abortTransaction();
+                            }
+
                             throw new Error(`Unhandled exception in privileges.`);
                         }
                     }
@@ -465,7 +498,13 @@ class TurnController {
                 throw new Error("Module with turn.");
             }
         } catch (error: any) {
+            if (await session.inTransaction()) {
+                await session.abortTransaction();
+            }
             throw error;
+        }
+        finally {
+            await session.endSession();
         }
     }
 
@@ -816,9 +855,10 @@ class TurnController {
         }
     }
 
-    static async migration(): Promise<boolean> {
+    static async migration(sucursal?: string): Promise<boolean> {
         try {
-            const res = await Turn.find({});
+            const querySuc = sucursal ? {sucursal: sucursal} : {};
+            const res = await Turn.find(querySuc);
             const query: any[] = [];
             res.forEach(element => {
                 const auxItem: any = {};
@@ -828,7 +868,7 @@ class TurnController {
             await TurnHistory.bulkWrite(query);
 
             await Turn.bulkWrite([
-                { deleteMany: { filter: {} } }  
+                { deleteMany: { filter: querySuc } }  
             ]);
             
             return true;

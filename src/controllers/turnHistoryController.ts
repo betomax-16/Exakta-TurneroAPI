@@ -33,7 +33,7 @@ class TurnHistoryController {
                 myQuery = getQueriesMongo(queries);
             }
 
-            return await TurnHistory.find(myQuery);   
+            return await TurnHistory.find(myQuery).limit(1000);   
 
             // let firstD: moment.Moment = moment(firstDate, ["MM-DD-YYYY", "YYYY-MM-DD"]);
             // let lastD: moment.Moment = moment(lastDate, ["MM-DD-YYYY", "YYYY-MM-DD"]);

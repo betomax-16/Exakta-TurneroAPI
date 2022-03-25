@@ -283,8 +283,9 @@ class TurnRoutes {
 
     async resset(req: Request, res: Response) {
         try {
-            if (await turnController.migration()) {
-                if (await traceTurnController.migration()) {
+            const sucursal: any = req.query.suc;
+            if (await turnController.migration(sucursal)) {
+                if (await traceTurnController.migration(sucursal)) {
                     ResponseWrapper.handler(res, {message: 'Successful reboot.'}, 200);
                 }
             }
