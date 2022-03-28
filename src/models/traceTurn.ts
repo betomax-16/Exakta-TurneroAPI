@@ -31,17 +31,17 @@ const TraceTurnSchema: Schema<ITraceTurn> = new Schema<ITraceTurn>({
     if (this.turn && this.sucursal) {
         const turn = await turnController.get(this.turn, this.sucursal);
         if (!turn) {
-            next(new Error(`The turn: '${this.turn}'' in sucursal: '${this.sucursal}' are not exist.`));
+            next(new Error(`El turno: '${this.turn}'' en la sucursal: '${this.sucursal}' no existe.`));
         }
     }
     else {
-        next(new Error(`The fields 'turn' and 'sucursal' are mandatory.`));
+        next(new Error(`Los campos 'turno' y 'sucursal' son obligatorios.`));
     }
 
     if (this.state) {
         const state = await turnStateController.get(this.state);
         if (!state) {
-            next(new Error(`Non-existent TurnStates "${this.state}"".`));
+            next(new Error(`Estado del turno inexistente: "${this.state}"".`));
         }
     }
     next();

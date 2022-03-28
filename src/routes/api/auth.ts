@@ -47,7 +47,7 @@ class AuthRoute {
                     ResponseWrapper.handler(res, {token}, 200);
                 }
                 else {
-                    ResponseWrapper.handler(res, {message: 'Non-existent user.'}, 404);  
+                    ResponseWrapper.handler(res, {message: 'Usuario inexistente.'}, 404);  
                 }
             }
             else {

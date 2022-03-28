@@ -27,7 +27,7 @@ const UserSchema: Schema = new Schema({
 .pre("updateOne", async function(next) {
     if (this._update.$set.rol && this._update.$set.rol != '') {
         if (!await rolController.get(this._update.$set.rol)) {
-            next(new Error('Non-existent role.'));
+            next(new Error('Rol inexistente.'));
         }
     }
 

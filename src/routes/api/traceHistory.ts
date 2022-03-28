@@ -57,14 +57,14 @@ class TraceHistoryRoutes {
             if (date.isValid()) {
                 const result: ITraceHistory|null = await traceHistoryController.deleteFrom(date.format("YYYY-MM-DD"));
                 if (result) {
-                    ResponseWrapper.handler(res, {message: 'Successfully deleted.'}, 200);
+                    ResponseWrapper.handler(res, {message: 'Eliminación exitosa.'}, 200);
                 }
                 else {
                     ResponseWrapper.handler(res, {}, 404);
                 } 
             }
             else {
-                ResponseWrapper.handler(res, {message: 'Mandatory date.'}, 400);
+                ResponseWrapper.handler(res, {message: 'Fecha obligatoria.'}, 400);
             }
         } catch (error: any) {
             Errors.handler(error, res);

@@ -129,7 +129,7 @@ class TurnController {
                 }
             }
             else {
-                throw new Error("No update state");
+                throw new Error("No se actualizo el estado del turno.");
             }
         } catch (error: any) {
             throw error;
@@ -264,7 +264,7 @@ class TurnController {
             return await TurnController.createTrace('espera', data, session);
         }
         else {
-            throw new Error("No shifts");
+            throw new Error("No hay turnos.");
         }
     }
 
@@ -347,7 +347,7 @@ class TurnController {
                                         await session.abortTransaction();
                                     }
 
-                                    throw new Error("No shifts");
+                                    throw new Error("No hay turnos.");
                                 }
                             }
                             // const next = await TurnController.getOldNextTurn(sucursal, dateInit, dateFinish);
@@ -394,14 +394,14 @@ class TurnController {
                                     await session.abortTransaction();
                                 }
 
-                                throw new Error("No shifts");
+                                throw new Error("No hay turnos.");
                             }
                             else {
                                 if (await session.inTransaction()) {
                                     await session.abortTransaction();
                                 }
 
-                                throw new Error(`Sucursal: ${sucursal} has no areas.`);
+                                throw new Error(`Sucursal: ${sucursal} no tiene areas asignadas.`);
                             }
                         }
                         else if (resPrivilege) {
@@ -471,14 +471,14 @@ class TurnController {
                                     await session.abortTransaction();
                                 }
 
-                                throw new Error("No shifts");  
+                                throw new Error("No hay turnos.");  
                             }
                             else {
                                 if (await session.inTransaction()) {
                                     await session.abortTransaction();
                                 }
 
-                                throw new Error(`Sucursal: ${sucursal} has no areas.`);
+                                throw new Error(`Sucursal: ${sucursal} no tiene areas asignadas.`);
                             }                     
                         }
                         else {
@@ -486,16 +486,16 @@ class TurnController {
                                 await session.abortTransaction();
                             }
 
-                            throw new Error(`Unhandled exception in privileges.`);
+                            throw new Error(`Excepción no controlada con los privilegios del módulo.`);
                         }
                     }
                 }
                 else {
-                    throw new Error("Module not found.");
+                    throw new Error("Módulo no encontrado.");
                 }
             }
             else {
-                throw new Error("Module with turn.");
+                throw new Error("Módulo con turno.");
             }
         } catch (error: any) {
             if (await session.inTransaction()) {

@@ -56,7 +56,7 @@ class TraceController {
                 });   
             }
             else {
-                throw new Error("Some date has no format [yyyy-mm-dd].");
+                throw new Error("Alguna fecha no tiene el formato: [yyyy-mm-dd].");
             }
         } catch (error) {
             throw error;

@@ -57,11 +57,11 @@ class SupervisorRoutes {
                     ResponseWrapper.handler(res, response, 201);
                 }
                 else {
-                    ResponseWrapper.handler(res, {message: 'cannot create binding'}, 500);
+                    ResponseWrapper.handler(res, {message: 'No se pudo crear la relación.'}, 500);
                 }
             }
             else {
-                ResponseWrapper.handler(res, {message: 'unauthorized'}, 401);
+                ResponseWrapper.handler(res, {message: 'No autorizado.'}, 401);
             }
         } catch (error: any) {
             Errors.handler(error, res);
@@ -75,14 +75,14 @@ class SupervisorRoutes {
             if (rol === 'Admin') {
                 const result: ISupervisor|null = await supervisorController.delete(req.params.id);
                 if (result) {
-                    ResponseWrapper.handler(res, {message: 'Successfully deleted.'}, 200);
+                    ResponseWrapper.handler(res, {message: 'Eliminación exitosa.'}, 200);
                 }
                 else {
                     ResponseWrapper.handler(res, {}, 404);
                 }
             }
             else {
-                ResponseWrapper.handler(res, {message: 'unauthorized'}, 401);
+                ResponseWrapper.handler(res, {message: 'No autorizado.'}, 401);
             }
         } catch (error: any) {
             Errors.handler(error, res);

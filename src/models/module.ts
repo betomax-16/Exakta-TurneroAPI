@@ -37,7 +37,7 @@ const ModuloSchema: Schema = new Schema({
     if (this.username) {
         const user = await userController.get(this.username);
         if (!user) {
-            next(new Error(`Non-existent user ${this.username}.`));
+            next(new Error(`Usuario inexistente: ${this.username}.`));
         }
         else {
             // Verificar que el usuario no este logueado en otra maquina(Modulo)[modulo, vigia, admin]
@@ -45,7 +45,7 @@ const ModuloSchema: Schema = new Schema({
             if (res) {
                 for (let index = 0; index < res.length; index++) {
                     if (res[index].username && res[index].username == this.username) {
-                        next(new Error(`User ${this.username} is operating another module ( ${res[index].name} ).`));
+                        next(new Error(`Usuario ${this.username} esta activo en otro módulo: ( ${res[index].name} ).`));
                     }
                 }
             }
@@ -64,7 +64,7 @@ const ModuloSchema: Schema = new Schema({
     if (this._update.$set.username && this._update.$set.username != '') {
         const user = await userController.get(this._update.$set.username);
         if (!user) {
-            next(new Error(`Non-existent user ${this._update.$set.username}.`));
+            next(new Error(`Usuario inexistente: ${this._update.$set.username}.`));
         }
         // Verificar que el usuario no este logueado en otra maquina(Modulo)[modulo, vigia, admin]
         else {
@@ -72,7 +72,7 @@ const ModuloSchema: Schema = new Schema({
             if (res) {
                 for (let index = 0; index < res.length; index++) {
                     if (res[index].username && res[index].username == this._update.$set.username) {
-                        next(new Error(`User ${this._update.$set.username} is operating another module ( ${res[index].name} ).`));
+                        next(new Error(`Usuario ${this._update.$set.username} esta activo en otro módulo: ( ${res[index].name} ).`));
                     }
                 }
             }

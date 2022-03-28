@@ -87,7 +87,7 @@ class AreaRoutes {
             //Si hay recepcionistas asociadas al area a eliminar, eliminar esos registros
             const result: IArea|null = await areaController.delete(req.params.name);
             if (result) {
-                ResponseWrapper.handler(res, {message: 'Successfully deleted.'}, 200);
+                ResponseWrapper.handler(res, {message: 'Eliminación exitosa.'}, 200);
             }
             else {
                 ResponseWrapper.handler(res, {}, 404);

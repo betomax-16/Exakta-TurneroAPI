@@ -19,7 +19,7 @@ export function reset() {
         try {
           if (await turnController.migration()) {
               if (await traceTurnController.migration()) {
-                  console.log({message: 'Successful reboot.', date: moment().toString()});
+                  console.log({message: 'Reinicio exitoso.', date: moment().toString()});
               }
           }
         } catch (e) {
@@ -39,7 +39,7 @@ export function clearHistories() {
           const date = moment();
           await traceHistoryController.deleteFrom(date.format("YYYY-MM-DD"));
           await turnHistoryController.deleteFrom(date.format("YYYY-MM-DD"));
-          console.log({message: 'Successful delete history.', date: date.toString()});
+          console.log({message: 'Eliminación de datos historicos exitosa.', date: date.toString()});
         } catch (e) {
           console.error(e);
         }
@@ -56,7 +56,7 @@ export function logout() {
     try {
       const date = moment();
       await traceTurnController.logout();
-      console.log({message: 'Successful logout.', date: date.toString()});
+      console.log({message: 'Cierres de sesión exitoso.', date: date.toString()});
     } catch (e) {
       console.error(e);
     }

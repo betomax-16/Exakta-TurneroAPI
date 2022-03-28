@@ -71,7 +71,7 @@ class TraceHistoryController {
                 return await TraceHistory.deleteMany({ creationDate: { $lte: dateIndex.toDate() } });
             }
             else {
-                throw new Error("The date has no format [yyyy-mm-dd].");
+                throw new Error("La fecha no tiene el formato: [yyyy-mm-dd].");
             }
         } catch (error: any) {
             throw error;

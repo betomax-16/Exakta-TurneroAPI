@@ -25,7 +25,7 @@ const AreaSucursalSchema: Schema<IAreaSucursal> = new Schema<IAreaSucursal>({
     if (this.area) {
         const area = await areaController.get(this.area);
         if (!area) {
-            next(new Error(`Non-existent Area "${this.area}"".`));
+            next(new Error(`Area inexistente: "${this.area}"".`));
         }
     }
     

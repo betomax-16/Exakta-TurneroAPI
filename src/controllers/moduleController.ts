@@ -131,7 +131,7 @@ class ModuleController {
                 return module;
             }
             else {
-                throw new Error(`Module: ${name} not found.`);
+                throw new Error(`Módulo: ${name} no encontrado.`);
             }
         } catch (error: any) {
             throw error;

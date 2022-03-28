@@ -50,7 +50,7 @@ class UserController {
                 }
             }
             else {
-                throw new Error("Non-existent role.");
+                throw new Error("Rol inexistente.");
             }
         } catch (error) {
             if (createCredential) {

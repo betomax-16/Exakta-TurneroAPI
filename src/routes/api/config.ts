@@ -45,7 +45,7 @@ class ConfigRoutes {
         try {
             const result: IConfig|null = await configController.delete();
             if (result) {
-                ResponseWrapper.handler(res, {message: 'Successfully deleted.'}, 200);
+                ResponseWrapper.handler(res, {message: 'Eliminación exitosa.'}, 200);
             }
             else {
                 ResponseWrapper.handler(res, {}, 404);

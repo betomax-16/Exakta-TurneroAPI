@@ -115,7 +115,7 @@ class TurnRoutes {
         try {
             const result: ITurn|null = await turnController.delete();
             if (result) {
-                ResponseWrapper.handler(res, {message: 'Successfully deleted.'}, 200);
+                ResponseWrapper.handler(res, {message: 'Eliminación exitosa.'}, 200);
             }
             else {
                 ResponseWrapper.handler(res, {}, 404);
@@ -151,11 +151,11 @@ class TurnRoutes {
                     ResponseWrapper.handler(res, result, 201);
                 }
                 else {
-                    throw new Error(`The user ${username} is not in a module`);
+                    throw new Error(`El usuario ${username} no esta en un módulo.`);
                 }
             }
             else {
-                throw new Error(`The user ${username} is not a "Receptionist"`);
+                throw new Error(`El usuario ${username} no tiene un rol de "Recepcionista"`);
             }
         } catch (error: any) {
             Errors.handler(error, res);
@@ -286,7 +286,7 @@ class TurnRoutes {
             const sucursal: any = req.query.suc;
             if (await turnController.migration(sucursal)) {
                 if (await traceTurnController.migration(sucursal)) {
-                    ResponseWrapper.handler(res, {message: 'Successful reboot.'}, 200);
+                    ResponseWrapper.handler(res, {message: 'Reinicio exitoso.'}, 200);
                 }
             }
         } catch (error) {

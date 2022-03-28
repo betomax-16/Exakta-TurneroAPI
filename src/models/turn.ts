@@ -33,14 +33,14 @@ const TurnoSchema: Schema = new Schema({
     if (this.state) {
         const state = await turnStateController.get(this.state);
         if (!state) {
-            next(new Error(`Non-existent TurnStates "${this.state}"".`));
+            next(new Error(`Estado del turno inexistente: "${this.state}"".`));
         }
     }
 
     if (this.area) {
         const area = await areaController.get(this.area);
         if (!area) {
-            next(new Error(`Non-existent Area "${this.area}"".`));
+            next(new Error(`Area inexistente: "${this.area}"".`));
         }
     }
     
@@ -50,14 +50,14 @@ const TurnoSchema: Schema = new Schema({
     if (this._update.$set.state) {
         const state = await turnStateController.get(this._update.$set.state);
         if (!state) {
-            next(new Error(`Non-existent TurnStates "${this._update.$set.state}"".`));
+            next(new Error(`Estado del turno inexistente: "${this._update.$set.state}"".`));
         }
     }
     
     if (this._update.$set.area) {
         const area = await areaController.get(this._update.$set.area);
         if (!area) {
-            next(new Error(`Non-existent Area "${this._update.$set.area}"".`));
+            next(new Error(`Area inexistente: "${this._update.$set.area}"".`));
         }
     }
 

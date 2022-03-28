@@ -89,7 +89,7 @@ class UserRoutes {
         try {
             const result: IUser|null = await userController.delete(req.params.username);
             if (result) {
-                ResponseWrapper.handler(res, {message: 'Successfully deleted user.'}, 200);
+                ResponseWrapper.handler(res, {message: 'Eliminación exitosa.'}, 200);
             }
             else {
                 ResponseWrapper.handler(res, {}, 404);

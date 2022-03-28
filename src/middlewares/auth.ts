@@ -27,12 +27,12 @@ export const checkJwt = (req: Request, res: Response, next: NextFunction) => {
       res.locals.jwtPayload = jwtPayload;
     } catch (error) {
       if (error instanceof jwt.TokenExpiredError) {
-        ResponseWrapper.handler(res, {message: 'TokenExpired'}, 401);
+        ResponseWrapper.handler(res, {message: 'Token expirado.'}, 401);
         return;
       }
       else {
         //If token is not valid, respond with 401 (unauthorized)
-        ResponseWrapper.handler(res, {message: 'unauthorized'}, 401);
+        ResponseWrapper.handler(res, {message: 'Token no autorizado.'}, 401);
         return;
       }
     }

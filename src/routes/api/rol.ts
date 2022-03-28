@@ -63,14 +63,14 @@ class ModuleRoutes {
             if (await User.find({rol: req.params.name}).count() == 0) {
                 const result: IRol|null = await rolController.delete(req.params.name);
                 if (result) {
-                    ResponseWrapper.handler(res, {message: 'Successfully deleted.'}, 200);
+                    ResponseWrapper.handler(res, {message: 'Eliminación exitosa.'}, 200);
                 }
                 else {
                     ResponseWrapper.handler(res, {}, 404);
                 }
             }
             else {
-                ResponseWrapper.handler(res, {message: 'There are active users with that role, update their roles and continue with the deletion.'}, 428);
+                ResponseWrapper.handler(res, {message: 'Existen usuarios con ese rol, actualizalos y continua con la eliminación.'}, 428);
             }
         } catch (error: any) {
             Errors.handler(error, res);

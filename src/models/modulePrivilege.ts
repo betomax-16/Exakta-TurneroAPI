@@ -19,7 +19,7 @@ const ModulePrivilegeSchema: Schema = new Schema({
     if (this.area) {
         const resArea = await areaController.get(this.area);
         if (!resArea) {
-            next(new Error(`Non-existent area ${this.area}.`));
+            next(new Error(`Area inexistente: ${this.area}.`));
         } 
     }
     next();
@@ -28,7 +28,7 @@ const ModulePrivilegeSchema: Schema = new Schema({
     if (this._update.$set.area) {
         const resArea = await areaController.get(this._update.$set.area);
         if (!resArea) {
-            next(new Error(`Non-existent area ${this._update.$set.area}.`));
+            next(new Error(`Area inexistente: ${this._update.$set.area}.`));
         }
     }
     next();

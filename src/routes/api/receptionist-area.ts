@@ -63,7 +63,7 @@ class Receptionist_AreaRoutes {
         try {
             const result: IReceptionist_Area|null = await receptionist_areaController.delete(req.params.username, req.params.area);
             if (result) {
-                ResponseWrapper.handler(res, {message: 'Successfully deleted.'}, 200);
+                ResponseWrapper.handler(res, {message: 'Eliminación exitosa.'}, 200);
             }
             else {
                 ResponseWrapper.handler(res, {}, 404);

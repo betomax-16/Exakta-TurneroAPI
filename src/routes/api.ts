@@ -42,7 +42,7 @@ class Routes {
 
         // respuesta default en caso de solicitar a una ruta no definida
         this.router.use((req: Request, res: Response) => {
-            ResponseWrapper.handler(res, {message:'Resource not found.'}, 404);
+            ResponseWrapper.handler(res, {message:'Recurso no encontrado.'}, 404);
         });
     }
 }

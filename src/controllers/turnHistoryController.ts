@@ -82,7 +82,7 @@ class TurnHistoryController {
                 return await TurnHistory.deleteMany({ creationDate: { $lte: dateIndex.toDate() } });
             }
             else {
-                throw new Error("The date has no format [yyyy-mm-dd].");
+                throw new Error("La fecha no tiene formato: [yyyy-mm-dd].");
             }
         } catch (error: any) {
             throw error;
