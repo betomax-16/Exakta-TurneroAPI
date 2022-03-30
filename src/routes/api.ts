@@ -16,6 +16,7 @@ import { ResponseWrapper } from "../utils/responseWrapper";
 import supervisorsRoute from "./api/supervisors";
 import configRoute from "./api/config";
 import sucursalCRoute from "./api/sucursal";
+import logRoute from "./api/log";
 
 class Routes {
     public router: Router;
@@ -39,6 +40,7 @@ class Routes {
         this.router.use(supervisorsRoute);
         this.router.use(configRoute);
         this.router.use(sucursalCRoute);
+        this.router.use(logRoute);
 
         // respuesta default en caso de solicitar a una ruta no definida
         this.router.use((req: Request, res: Response) => {
