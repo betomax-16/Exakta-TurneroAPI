@@ -495,7 +495,7 @@ class TurnController {
                 }
             }
             else {
-                throw new Error("Módulo con turno.");
+                throw new Error(`El turno '${existeTurnLast[0].turn}' sigue en atención en el módulo '${existeTurnLast[0].ubication}, finalízalo.'`);
             }
         } catch (error: any) {
             if (await session.inTransaction()) {
