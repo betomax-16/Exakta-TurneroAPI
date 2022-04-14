@@ -17,39 +17,39 @@ try {
     // console.log(socket.handshake.query);
     // console.log(users);
   
-    socket.on('newTurn', ({ sucursal, data }) => {
-      if (sucursal && data) {
-        socket.broadcast.to(sucursal).emit('newTurn', data); 
+    socket.on('newTurn', (obj) => {
+      if (obj && obj.sucursal && obj.data) {
+        socket.broadcast.to(obj.sucursal).emit('newTurn', obj.data); 
       }
     });
   
-    socket.on('turnAttend', ({ sucursal, data }) => {
-      if (sucursal && data) {
-        socket.broadcast.to(sucursal).emit('turnAttend', data);
+    socket.on('turnAttend', (obj) => {
+      if (obj && obj.sucursal && obj.data) {
+        socket.broadcast.to(obj.sucursal).emit('turnAttend', obj.data);
       }
     });
   
-    socket.on('turnFinish', ({ sucursal, data }) => {
-      if (sucursal && data) {
-        socket.broadcast.to(sucursal).emit('turnFinish', data);
+    socket.on('turnFinish', (obj) => {
+      if (obj && obj.sucursal && obj.data) {
+        socket.broadcast.to(obj.sucursal).emit('turnFinish', obj.data);
       }
     });
   
-    socket.on('newTurnTest', ({ sucursal, type, data }) => {
-      if (sucursal && type && data) {
-        socket.broadcast.to(`${sucursal}-${type}`).emit('newTurnTest', data);
+    socket.on('newTurnTest', (obj) => {
+      if (obj && obj.sucursal && obj.type && obj.data) {
+        socket.broadcast.to(`${obj.sucursal}-${obj.type}`).emit('newTurnTest', obj.data);
       }
     });
   
-    socket.on('attendTurnTest', ({ sucursal, type, data }) => {
-      if (sucursal && type && data) {
-        socket.broadcast.to(`${sucursal}-${type}`).emit('attendTurnTest', data);
+    socket.on('attendTurnTest', (obj) => {
+      if (obj && obj.sucursal && obj.type && obj.data) {
+        socket.broadcast.to(`${obj.sucursal}-${obj.type}`).emit('attendTurnTest', obj.data);
       }
     });
   
-    socket.on('turnReCall', ({ sucursal, data }) => {
-      if (sucursal && data) {
-        socket.broadcast.to(sucursal).emit('turnReCall', data);
+    socket.on('turnReCall', (obj) => {
+      if (obj && obj.sucursal && obj.data) {
+        socket.broadcast.to(obj.sucursal).emit('turnReCall', obj.data);
       }
     });
   
@@ -59,31 +59,31 @@ try {
       }
     });
   
-    socket.on('join-type', ({ sucursal, module, user }, callback) => {
-      if (sucursal && module && module.type) {
-        socket.join(`${sucursal}-${module.type}`);
+    socket.on('join-type', (obj) => {
+      if (obj && obj.sucursal && obj.module && obj.module.type) {
+        socket.join(`${obj.sucursal}-${obj.module.type}`);
       }
       
-      if (sucursal && module && user) {
-        socket.broadcast.to(`${sucursal}`).emit('moduleLess', { module, user });
+      if (obj && obj.sucursal && obj.module && obj.user) {
+        socket.broadcast.to(`${obj.sucursal}`).emit('moduleLess', { module: obj.module, user: obj.user });
       }
     });
   
-    socket.on('addModule', ({ sucursal, module }) => {
-      if (sucursal && module) {
-        socket.broadcast.to(`${sucursal}`).emit('addModule', {module});
+    socket.on('addModule', (obj) => {
+      if (obj && obj.sucursal && obj.module) {
+        socket.broadcast.to(`${obj.sucursal}`).emit('addModule', {module: obj.module});
       }
     });
   
-    socket.on('leave-type', ({ sucursal, type }) => {
-      if (sucursal && type) {
-        socket.leave(`${sucursal}-${type}`);
+    socket.on('leave-type', (obj) => {
+      if (obj && obj.sucursal && obj.type) {
+        socket.leave(`${obj.sucursal}-${obj.type}`);
       }
     });
   
-    socket.on('leave-sucursal', ({ sucursal }) => {
-      if (sucursal) {
-        socket.leave(`${sucursal}`);
+    socket.on('leave-sucursal', (obj) => {
+      if (obj && obj.sucursal) {
+        socket.leave(`${obj.sucursal}`);
       }
     });
   
@@ -92,15 +92,15 @@ try {
     });
   
   
-    socket.on('join-module', ({ sucursal, module }, callback) => {
-      if (sucursal && module) {
-        socket.join(`${sucursal}-${module}`);
+    socket.on('join-module', (obj) => {
+      if (obj && obj.sucursal && obj.module) {
+        socket.join(`${obj.sucursal}-${obj.module}`);
       }
     });
   
-    socket.on('refresh', ({ sucursal, module }, callback) => {
-      if (sucursal && module) {
-        socket.broadcast.to(`${sucursal}-${module}`).emit('refresh');
+    socket.on('refresh', (obj) => {
+      if (obj && obj.sucursal && obj.module) {
+        socket.broadcast.to(`${obj.sucursal}-${obj.module}`).emit('refresh');
       }      
     });
   });
