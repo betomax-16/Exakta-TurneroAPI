@@ -2,6 +2,7 @@ import User, { IUser } from '../models/user';
 import rolController from "./rolController";
 import { RequestExternalAPI } from "../utils/requestExternalAPI";
 import { IQueryRequest, getQueriesMongo } from "../models/utils/queryRequest";
+import querystring  from "querystring";
 
 class UserController {
 
@@ -26,7 +27,8 @@ class UserController {
         let createCredential: boolean = false;
         try {
             if (await rolController.get(data.rol)) {
-                const user = await RequestExternalAPI.request('GET', `/api/user/${data.username}`);
+                const username = querystring.escape(data.username);
+                const user = await RequestExternalAPI.request('GET', `/api/user/${username}`);
                 
                 if (user.statusCode != 200) {
                     const resLogup = await RequestExternalAPI.request('POST', '/api/logup', data);
@@ -54,7 +56,8 @@ class UserController {
             }
         } catch (error) {
             if (createCredential) {
-                await RequestExternalAPI.request('DELETE', `/api/credentials/${data.username}`); 
+                const username = querystring.escape(data.username);
+                await RequestExternalAPI.request('DELETE', `/api/credentials/${username}`); 
             }
             
             throw error;

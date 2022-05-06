@@ -4,6 +4,7 @@ import { ITurnState } from "./turnState";
 import turnStateController from "../controllers/turnStateController";
 import areaController from "../controllers/areaController";
 import { RequestExternalAPI } from "../utils/requestExternalAPI";
+import querystring  from "querystring";
 
 export interface ITurn extends Document {
     turn: string; 
@@ -24,7 +25,8 @@ const TurnoSchema: Schema = new Schema({
 .index({ turn: 1, sucursal: 1 }, { unique: true })
 .pre("save", async function(this: ITurn, next) {
     if (this.sucursal) {
-        const resExternal = await RequestExternalAPI.request('GET', `/api/sucursal/${this.sucursal}`);
+        const suc = querystring.escape(this.sucursal);
+        const resExternal = await RequestExternalAPI.request('GET', `/api/sucursal/${suc}`);
         if (resExternal.statusCode != 200) {
             next(new Error(`statusCode: ${resExternal.statusCode}, message: ${resExternal.message}`));
         } 

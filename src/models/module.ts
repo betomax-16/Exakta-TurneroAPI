@@ -3,6 +3,7 @@ import { IUser } from "./user";
 import userController from "../controllers/userController";
 import moduleController from "../controllers/moduleController";
 import { RequestExternalAPI } from "../utils/requestExternalAPI";
+import querystring  from "querystring";
 
 export interface IModule extends Document {
     name: string;
@@ -27,7 +28,8 @@ const ModuloSchema: Schema = new Schema({
 .index({ username: 1, name: 1, sucursal: 1 }, { unique: true })
 .pre("save", async function(this: IModule, next) {
     if (this.sucursal) {
-        const resExternal = await RequestExternalAPI.request('GET', `/api/sucursal/${this.sucursal}`);
+        const suc = querystring.escape(this.sucursal);
+        const resExternal = await RequestExternalAPI.request('GET', `/api/sucursal/${suc}`);
         if (resExternal.statusCode != 200) {
             next(new Error(`statusCode: ${resExternal.statusCode}, message: ${resExternal.message}`));
         } 
@@ -55,7 +57,8 @@ const ModuloSchema: Schema = new Schema({
 })
 .pre("updateOne", async function(next) {
     if (this._update.$set.sucursal) {
-        const resExternal = await RequestExternalAPI.request('GET', `/api/sucursal/${this._update.$set.sucursal}`);
+        const suc = querystring.escape(this._update.$set.sucursal);
+        const resExternal = await RequestExternalAPI.request('GET', `/api/sucursal/${suc}`);
         if (resExternal.statusCode != 200) {
             next(new Error(`statusCode: ${resExternal.statusCode}, message: ${resExternal.message}`));
         } 

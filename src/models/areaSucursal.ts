@@ -2,6 +2,7 @@ import { model, Schema, Document } from 'mongoose';
 import areaController from "../controllers/areaController";
 import { RequestExternalAPI } from "../utils/requestExternalAPI";
 import { IArea } from "./area";
+import querystring  from "querystring";
 
 export interface IAreaSucursal extends Document {
     area: IArea['name']; 
@@ -16,7 +17,8 @@ const AreaSucursalSchema: Schema<IAreaSucursal> = new Schema<IAreaSucursal>({
 .index({ area: 1, sucursal: 1 }, { unique: true })
 .pre("save", async function(this: IAreaSucursal, next) {
     if (this.sucursal) {
-        const resExternal = await RequestExternalAPI.request('GET', `/api/sucursal/${this.sucursal}`);
+        const suc = querystring.escape(this.sucursal);
+        const resExternal = await RequestExternalAPI.request('GET', `/api/sucursal/${suc}`);
         if (resExternal.statusCode != 200) {
             next(new Error(`statusCode: ${resExternal.statusCode}, message: ${resExternal.message}`));
         } 
