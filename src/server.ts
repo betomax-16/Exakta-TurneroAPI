@@ -48,22 +48,16 @@ class Server {
     
     let dataBase: any  = '';
     if (MODE === 'PROD') {
-      dataBase = MONGO_URI_PROD;
-      mongoose.connect(MONGO_URI_PROD || '', {
-        auth: {
-          password: MONGO_PASS_AZURE,
-          username: MONGO_USER_AZURE
-        },
-        retryWrites: false
-      });
+      dataBase = MONGO_URI_PROD || '';
+      mongoose.connect(dataBase, { directConnection: true });
     }
     else if (MODE === 'TEST') {
-      dataBase = MONGO_URI_TEST;
-      mongoose.connect(MONGO_URI_TEST || '');
+      dataBase = MONGO_URI_TEST || '';
+      mongoose.connect(dataBase, { directConnection: true });
     }
     else if (MODE === 'DEV') {
-      dataBase = MONGO_URI_DEV;
-      mongoose.connect(MONGO_URI_DEV || '', { replicaSet: 'testrep' });
+      dataBase = MONGO_URI_DEV || '';
+      mongoose.connect(dataBase);
     }
 
     const db = mongoose.connection;
