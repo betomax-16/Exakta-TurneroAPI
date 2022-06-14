@@ -49,15 +49,15 @@ class Server {
     let dataBase: any  = '';
     if (MODE === 'PROD') {
       dataBase = MONGO_URI_PROD || '';
-      mongoose.connect(dataBase, { directConnection: true });
+      mongoose.connect(dataBase, { replicaSet: 'testrep' });
     }
     else if (MODE === 'TEST') {
       dataBase = MONGO_URI_TEST || '';
-      mongoose.connect(dataBase, { directConnection: true });
+      mongoose.connect(dataBase, { replicaSet: 'testrep' });
     }
     else if (MODE === 'DEV') {
       dataBase = MONGO_URI_DEV || '';
-      mongoose.connect(dataBase);
+      mongoose.connect(dataBase, { replicaSet: 'testrep' });
     }
 
     const db = mongoose.connection;
