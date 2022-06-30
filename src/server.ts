@@ -10,6 +10,7 @@ import dotenv from "dotenv";
 import cors from "cors";
 import fs = require('fs');
 
+
 // import swaggerJsDoc from "swagger-jsdoc";
 import { initDB } from "./utils/initDB";
 import { getEnv } from "./enviroment";
@@ -44,7 +45,7 @@ class Server {
 
   private config(): void {
     getEnv();
-    const {MONGO_URI_DEV, MONGO_URI_TEST, MONGO_URI_PROD, MONGO_USER_AZURE, MONGO_PASS_AZURE, MODE} = process.env;
+    const {MONGO_URI_DEV, MONGO_URI_TEST, MONGO_URI_PROD, MODE} = process.env;
     
     let dataBase: any  = '';
     if (MODE === 'PROD') {
@@ -76,12 +77,12 @@ class Server {
     new CronTask([reset, clearHistories, logout]);
     this.app.use(cors());
     // para aceder a los recursos de static la ruta seria "localhost:{port}/{direccion del recurso a buscar}"
-    this.app.use('/', express.static(path.join(__dirname, 'static')));
+    const dir = MODE === 'PROD' ? 'static' : 'public';
+    this.app.use('/', express.static(path.join(__dirname, dir)));
     
 
     this.app.use(express.json());
     this.app.use(express.urlencoded({ extended: false }));
-    
     
     this.app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(this.swaggerDocument, undefined, undefined, this.customCss));
     this.app.use('/api', routerApi);

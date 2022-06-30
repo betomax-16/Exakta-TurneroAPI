@@ -17,6 +17,7 @@ import supervisorsRoute from "./api/supervisors";
 import configRoute from "./api/config";
 import sucursalCRoute from "./api/sucursal";
 import logRoute from "./api/log";
+import addsRoute from "./api/adds";
 
 class Routes {
     public router: Router;
@@ -41,6 +42,7 @@ class Routes {
         this.router.use(configRoute);
         this.router.use(sucursalCRoute);
         this.router.use(logRoute);
+        this.router.use(addsRoute);
 
         // respuesta default en caso de solicitar a una ruta no definida
         this.router.use((req: Request, res: Response) => {
