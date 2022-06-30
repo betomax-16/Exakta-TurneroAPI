@@ -3,7 +3,7 @@ import path from "path";
 import { getEnv } from "../enviroment";
 
 getEnv();
-const {MODE, PATH_ADDS} = process.env;
+const {MODE, PATH_ADDS, PORT} = process.env;
 
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
@@ -13,7 +13,8 @@ const storage = multer.diskStorage({
     },
     filename: (req, file, cb) => {
         const ext = file.mimetype.split('/')[1];
-        cb(null, `${Date.now()}.${ext}`)
+        const fileName = `${Date.now()}.${ext}`;
+        cb(null, fileName);
     }
 });
   
