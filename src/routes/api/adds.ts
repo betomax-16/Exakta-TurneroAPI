@@ -25,10 +25,11 @@ class AddsRoutes {
     }
 
     routes() {
-        this.router.route('/adds')
+        this.router.route('/images')
                         .get(this.getAll)
                         .post([checkJwt, checkPath(dir), uploadMiddleware], this.save);
-        this.router.route('/adds/:idFile')
+        this.router.route('/images/:idFile')
+                        .put([checkJwt], this.update)
                         .delete([checkJwt], this.remove)
     }
 
@@ -44,8 +45,9 @@ class AddsRoutes {
         }
         else {
             const files = req.files as any;
+            
             for (let index = 0; index < files.length; index++) {
-                const file = files['myFiles'][index];
+                const file = files[index];
                 await ad.create({
                     url: `${req.protocol}://${req.hostname}:${PORT}/${PATH_ADDS || ''}/${file.filename}`,
                     fileName: file.filename,
@@ -67,6 +69,21 @@ class AddsRoutes {
         }
 
         ResponseWrapper.handler(res, {}, 204);
+    }
+
+    async update(req: Request, res: Response) {
+        try {
+            const resultUpdate = await ad.updateOne({_id: req.params.idFile}, { $set: {isActive: req.body.isActive} });
+            if (resultUpdate && resultUpdate.modifiedCount == 1) {
+                const file = await ad.findById(req.params.idFile);
+                ResponseWrapper.handler(res, file, 200);
+            }
+            else {
+                ResponseWrapper.handler(res, {}, 404);
+            }
+        } catch (error: any) {
+            Errors.handler(error, res);
+        }
     }
 }
 

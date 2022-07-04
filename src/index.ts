@@ -103,6 +103,10 @@ try {
         socket.broadcast.to(`${obj.sucursal}-${obj.module}`).emit('refresh');
       }      
     });
+
+    socket.on('updateImages', () => {
+      socket.broadcast.emit('updateImages');     
+    });
   });
   
   server.http.listen(port, () => {
