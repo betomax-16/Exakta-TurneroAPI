@@ -1,4 +1,4 @@
-import moment from "moment";
+import moment from "moment-timezone";
 import mongoose, {ClientSession} from "mongoose";
 import Turn, { ITurn } from '../models/turn';
 import TurnHistory from "../models/turnHistory";
@@ -9,6 +9,10 @@ import { IQueryRequest, getQueriesMongo } from "../models/utils/queryRequest";
 import moduleController from "../controllers/moduleController";
 import modulePrivilegeController from "../controllers/modulePrivilegeController";
 import areaSucursalController from "../controllers/areaSucursalController";
+import dotenv from "dotenv";
+import { getEnv } from "../enviroment";
+
+dotenv.config();
 
 class TurnController {
 
@@ -103,9 +107,11 @@ class TurnController {
 
     private static async createTrace(oldState: string, trace: ITraceTurn|any, session?: ClientSession): Promise<any|null> {
         try {
+            getEnv();
+            const {TZ} = process.env;
             const result = await TurnController.update(trace.turn, trace.sucursal, {state: trace.state}, session);
             if ((result.modifiedCount && result.modifiedCount == 1) || trace.state === 're-call') {
-                const dateTrace = moment().toDate();
+                const dateTrace = moment().tz(TZ||'America/Mexico_City').toDate();
                 const data: any = { finalDate: dateTrace, state: trace.state };
 
                 const res = await traceTurnController.update(trace.turn, trace.sucursal, oldState, data, session);
@@ -138,6 +144,8 @@ class TurnController {
 
     static async takeNewTurn(area: string, sucursal: string): Promise<any|null> {
         try {
+            getEnv();
+            const {TZ} = process.env;
             let next: string;
             const lastTurn = await Turn.aggregate([
                 { $lookup: {
@@ -178,7 +186,7 @@ class TurnController {
                 next = areaResult?.prefix + '001';
             }
 
-            const dateInit = moment().toDate();
+            const dateInit = moment().tz(TZ||'America/Mexico_City').toDate();
             const state = 'espera';
             const data = {
                 turn: next,
@@ -269,10 +277,12 @@ class TurnController {
     }
 
     static async nextTurn(area: string, sucursal: string, ubication: string, useraname: string): Promise<ITurn|null> {
+        getEnv();
+        const {TZ} = process.env;
         const session = await mongoose.startSession();
         try {
-            const dateInit = moment().hour(0).minute(0).second(0).millisecond(0).toDate();
-            const dateFinish = moment().hour(23).minute(59).second(59).millisecond(999).toDate();
+            const dateInit = moment().tz(TZ||'America/Mexico_City').hour(0).minute(0).second(0).millisecond(0).toDate();
+            const dateFinish = moment().tz(TZ||'America/Mexico_City').hour(23).minute(59).second(59).millisecond(999).toDate();
             const resModule = await moduleController.get(ubication, sucursal);
             const existeTurnLast = await Trace.find({username: useraname, finalDate: { "$in": [ null, "" ] }});
             
@@ -533,8 +543,10 @@ class TurnController {
 
     static async getTurnsLookOut(sucursal: string) {
         try {
-            const dateInit = moment().hour(0).minute(0).second(0).millisecond(0).toDate();
-            const dateFinish = moment().hour(23).minute(59).second(59).millisecond(999).toDate();
+            getEnv();
+            const {TZ} = process.env;
+            const dateInit = moment().tz(TZ||'America/Mexico_City').hour(0).minute(0).second(0).millisecond(0).toDate();
+            const dateFinish = moment().tz(TZ||'America/Mexico_City').hour(23).minute(59).second(59).millisecond(999).toDate();
 
             return await Turn.find({$and: [{sucursal: sucursal}, {state: {$not: {$eq: 'terminado'}}}, {state: {$not: {$eq: 'cancelado'}}}, {creationDate:{
                 $gte:dateInit,
@@ -547,8 +559,10 @@ class TurnController {
 
     static async getTraceLookOut(sucursal: string) {
         try {
-            const dateInit = moment().hour(0).minute(0).second(0).millisecond(0).toDate();
-            const dateFinish = moment().hour(23).minute(59).second(59).millisecond(999).toDate();
+            getEnv();
+            const {TZ} = process.env;
+            const dateInit = moment().tz(TZ||'America/Mexico_City').hour(0).minute(0).second(0).millisecond(0).toDate();
+            const dateFinish = moment().tz(TZ||'America/Mexico_City').hour(23).minute(59).second(59).millisecond(999).toDate();
 
             return await Turn.aggregate([
                 { $match: { 
@@ -594,8 +608,10 @@ class TurnController {
                 query.area = area;
             }
 
-            const dateInit = moment().hour(0).minute(0).second(0).millisecond(0).toDate();
-            const dateFinish = moment().hour(23).minute(59).second(59).millisecond(999).toDate();
+            getEnv();
+            const {TZ} = process.env;
+            const dateInit = moment().tz(TZ||'America/Mexico_City').hour(0).minute(0).second(0).millisecond(0).toDate();
+            const dateFinish = moment().tz(TZ||'America/Mexico_City').hour(23).minute(59).second(59).millisecond(999).toDate();
             
             return await Trace.aggregate([
                 { $match: { 
@@ -675,8 +691,10 @@ class TurnController {
                 query.turn = turn;
             }
 
-            const dateInit = moment().hour(0).minute(0).second(0).millisecond(0).toDate();
-            const dateFinish = moment().hour(23).minute(59).second(59).millisecond(999).toDate();
+            getEnv();
+            const {TZ} = process.env;
+            const dateInit = moment().tz(TZ||'America/Mexico_City').hour(0).minute(0).second(0).millisecond(0).toDate();
+            const dateFinish = moment().tz(TZ||'America/Mexico_City').hour(23).minute(59).second(59).millisecond(999).toDate();
             
             
 
@@ -724,8 +742,10 @@ class TurnController {
 
     static async getPenddingShifts(sucursal: string): Promise<any[]|null> {
         try {
-            const dateInit = moment().hour(0).minute(0).second(0).millisecond(0).toDate();
-            const dateFinish = moment().hour(23).minute(59).second(59).millisecond(999).toDate();
+            getEnv();
+            const {TZ} = process.env;
+            const dateInit = moment().tz(TZ||'America/Mexico_City').hour(0).minute(0).second(0).millisecond(0).toDate();
+            const dateFinish = moment().tz(TZ||'America/Mexico_City').hour(23).minute(59).second(59).millisecond(999).toDate();
             
             return await Trace.aggregate([
                 {

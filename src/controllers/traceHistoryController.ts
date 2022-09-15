@@ -1,5 +1,6 @@
 import TraceHistory, { ITraceHistory } from '../models/traceHistory';
-import moment from "moment";
+import moment from "moment-timezone";
+import { getEnv } from "../enviroment";
 import { IQueryRequest, getQueriesMongo } from "../models/utils/queryRequest";
 // import { diacriticSensitiveRegex } from "../models/utils/queryRequest";
 
@@ -65,9 +66,11 @@ class TraceHistoryController {
 
     static async deleteFrom(date: string): Promise<any> {
         try {
+            getEnv();
+            const {TZ} = process.env;
             let dateIndex: moment.Moment = moment(date, ["MM-DD-YYYY", "YYYY-MM-DD"]);
             if (dateIndex.isValid()) {
-                dateIndex = dateIndex.hour(23).minute(59).second(59).millisecond(999);
+                dateIndex = dateIndex.tz(TZ||'America/Mexico_City').hour(23).minute(59).second(59).millisecond(999);
                 return await TraceHistory.deleteMany({ creationDate: { $lte: dateIndex.toDate() } });
             }
             else {

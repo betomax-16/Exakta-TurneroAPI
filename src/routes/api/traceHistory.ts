@@ -3,9 +3,10 @@ import { ITraceHistory } from '../../models/traceHistory';
 import traceHistoryController from "../../controllers/traceHistoryController";
 import { Errors } from "../../utils/errors";
 import { ResponseWrapper } from "../../utils/responseWrapper";
-import moment from "moment";
+import moment from "moment-timezone";
 import { checkJwt } from "../../middlewares/auth";
 import { IQueryRequest, getQueries } from "../../models/utils/queryRequest";
+import { getEnv } from "../../enviroment";
 
 class TraceHistoryRoutes {
     public router: Router;
@@ -53,9 +54,11 @@ class TraceHistoryRoutes {
 
     async delete(req: Request, res: Response) {
         try {
+            getEnv();
+            const {TZ} = process.env;
             const date = moment(req.query.date?.toString(), ["MM-DD-YYYY", "YYYY-MM-DD"]);
-            if (date.isValid()) {
-                const result: ITraceHistory|null = await traceHistoryController.deleteFrom(date.format("YYYY-MM-DD"));
+            if (date.tz(TZ||'America/Mexico_City').isValid()) {
+                const result: ITraceHistory|null = await traceHistoryController.deleteFrom(date.tz(TZ||'America/Mexico_City').format("YYYY-MM-DD"));
                 if (result) {
                     ResponseWrapper.handler(res, {message: 'Eliminación exitosa.'}, 200);
                 }

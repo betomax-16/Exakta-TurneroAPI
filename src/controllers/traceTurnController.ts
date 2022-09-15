@@ -1,9 +1,10 @@
 import TraceHistory from "../models/traceHistory";
 import TraceTurn, { ITraceTurn } from '../models/traceTurn';
 import Module from "../models/module";
-import moment from "moment";
+import moment from "moment-timezone";
 import {ClientSession} from "mongoose";
 import { IQueryRequest, getQueriesMongo } from "../models/utils/queryRequest";
+import { getEnv } from "../enviroment";
 
 class TraceController {
 
@@ -43,11 +44,13 @@ class TraceController {
 
     static async get(firstDate: string, lastDate: string): Promise<ITraceTurn[]|null> {
         try {
+            getEnv();
+            const {TZ} = process.env;
             let firstD: moment.Moment = moment(firstDate, ["MM-DD-YYYY", "YYYY-MM-DD"]);
             let lastD: moment.Moment = moment(lastDate, ["MM-DD-YYYY", "YYYY-MM-DD"]);
             if (firstD.isValid() && lastD.isValid()) {
-                firstD = firstD.hour(0).minute(0).second(0).millisecond(0);
-                lastD = lastD.hour(23).minute(59).second(59).millisecond(999);
+                firstD = firstD.tz(TZ||'America/Mexico_City').hour(0).minute(0).second(0).millisecond(0);
+                lastD = lastD.tz(TZ||'America/Mexico_City').hour(23).minute(59).second(59).millisecond(999);
                 return await TraceTurn.find({
                     createdAt: {
                         $gte: firstD.toDate(),

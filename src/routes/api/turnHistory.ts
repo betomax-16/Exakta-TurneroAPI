@@ -4,8 +4,9 @@ import turnHistoryController from "../../controllers/turnHistoryController";
 import { Errors } from "../../utils/errors";
 import { ResponseWrapper } from "../../utils/responseWrapper";
 import { checkJwt } from "../../middlewares/auth";
-import moment from "moment";
+import moment from "moment-timezone";
 import { IQueryRequest, getQueries } from "../../models/utils/queryRequest";
+import { getEnv } from "../../enviroment";
 
 class TurnHistoryRoutes {
     public router: Router;
@@ -64,9 +65,11 @@ class TurnHistoryRoutes {
 
     async deleteDaysAgo(req: Request, res: Response) {
         try {
+            getEnv();
+            const {TZ} = process.env;
             const date = moment(req.query.date?.toString(), ["MM-DD-YYYY", "YYYY-MM-DD"]);
-            if (date.isValid()) {
-                const result: ITurnHistory|null = await turnHistoryController.deleteFrom(date.format("YYYY-MM-DD"));
+            if (date.tz(TZ||'America/Mexico_City').isValid()) {
+                const result: ITurnHistory|null = await turnHistoryController.deleteFrom(date.tz(TZ||'America/Mexico_City').format("YYYY-MM-DD"));
                 if (result) {
                     ResponseWrapper.handler(res, {message: 'Eliminación exitosa.'}, 200);
                 }

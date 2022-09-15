@@ -1,4 +1,6 @@
-import moment from "moment";
+import moment from "moment-timezone";
+import { getEnv } from "../../enviroment";
+
 export interface IQueryRequest {
     field: string; 
     value: string;
@@ -15,6 +17,8 @@ export function diacriticSensitiveRegex(string: string): string {
 }
 
 function getValue(query: IQueryRequest, isEqual: boolean = false): any {
+    getEnv();
+    const {TZ} = process.env;
     let res: any = '';
     const formatDate1 = /^\d\d\d\d-(0?[1-9]|1[0-2])-(0?[1-9]|[12][0-9]|3[01])$/;
     const formatDate2 = /^\d\d\d\d-(0?[1-9]|1[0-2])-(0?[1-9]|[12][0-9]|3[01]) (00|[0-9]|1[0-9]|2[0-3]):([0-9]|[0-5][0-9])$/;
@@ -23,16 +27,16 @@ function getValue(query: IQueryRequest, isEqual: boolean = false): any {
     if (Number(query.value)) {
         res = query.value;
     }
-    else if (formatDate1.test(query.value) && moment(query.value).isValid()) {
-        res = moment(query.value).hour(0).minute(0).second(0).millisecond(0).toDate();
+    else if (formatDate1.test(query.value) && moment(query.value).tz(TZ||'America/Mexico_City').isValid()) {
+        res = moment(query.value).tz(TZ||'America/Mexico_City').hour(0).minute(0).second(0).millisecond(0).toDate();
     }
-    else if (formatDate2.test(query.value) && moment(query.value).isValid()) {
-        res = moment(query.value).second(0).millisecond(0).toDate();
+    else if (formatDate2.test(query.value) && moment(query.value).tz(TZ||'America/Mexico_City').isValid()) {
+        res = moment(query.value).tz(TZ||'America/Mexico_City').second(0).millisecond(0).toDate();
     }
     else if (formatDate3.test(query.value)) {
         const hour: number = parseInt(query.value.split(':')[0]);
         const minute: number = parseInt(query.value.split(':')[1]);
-        res = moment().hour(hour).minute(minute).second(0).millisecond(0).toDate();
+        res = moment().tz(TZ||'America/Mexico_City').hour(hour).minute(minute).second(0).millisecond(0).toDate();
     }
     else if (query.value.toLowerCase() === 'null') {
         res = { "$in": [ null, "" ] };
